@@ -86,7 +86,7 @@ int main(){
   }
 
   // Reading all the MPU 9250 registers
-  for(int i = 0; i < 126; i++){
+  for(int i = 0; i < 127; i++){
     uint8_t buf[2]  = {'\0'};  // Buffer to store data with terminating null
     MPU9250_REG_READ(file, i, buf);
     printf("%X\n", buf[0]);
