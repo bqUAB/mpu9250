@@ -10,6 +10,8 @@
 // RM-MPU-9250A-00, Rev. 1.6, 01/07/2015 for registers not listed in above
 // document.
 
+#define WHO_AM_I_MPU9250  0x75 // Should return 0x71
+
 uint8_t readByte(uint8_t address, uint8_t subAddress);
 
 #endif // _MPU9250_H_
