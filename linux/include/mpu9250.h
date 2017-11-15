@@ -17,6 +17,8 @@
 #define ACCEL_CONFIG      0x1C
 #define ACCEL_CONFIG2     0x1D
 
+#define ACCEL_XOUT_H      0x3B
+#define GYRO_XOUT_H       0x43
 #define WHO_AM_I_MPU9250  0x75 // Should return 0x71
 
 // Using the Sparkfun MPU-9250 breakout board, ADO is set to 0

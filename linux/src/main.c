@@ -58,6 +58,22 @@ bool MPU9250_REG_READ(int file, uint8_t reg_add, uint8_t *data){
 	return bSuccess;
 }
 
+bool MPU9250_REG_MULTI_READ(int file, uint8_t reg_add,\
+                            uint8_t count, uint8_t *data){
+	bool bSuccess = false;
+
+	// write to define register
+	if (write(file, &reg_add, sizeof(reg_add)) == sizeof(reg_add)){
+		// read back value
+		if (read(file, data, count) == count){
+			bSuccess = true;
+		}
+	}
+
+
+	return bSuccess;
+}
+
 int main(){
 
   printf("===== MPU 9250 Demo using Linux =====\n");

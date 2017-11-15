@@ -1,8 +1,10 @@
 #include <mpu9250.h>
 
 // api for register access, defined in main.c
-bool MPU9250_REG_WRITE(int file, uint8_t address, uint8_t value);
-bool MPU9250_REG_READ(int file, uint8_t address,uint8_t *value);
+bool MPU9250_REG_WRITE(int file, uint8_t reg_add, uint8_t value);
+bool MPU9250_REG_READ(int file, uint8_t reg_add, uint8_t *value);
+bool MPU9250_REGS_MULTI_READ(int file, uint8_t reg_add,\
+                             uint8_t count, uint8_t *data);
 
 //==============================================================================
 //= Set of useful function to access acceleration. gyroscope, magnetometer,    =
@@ -29,22 +31,26 @@ void MPU9250SelfTest(int file, float * destination){
   MPU9250_REG_WRITE(file, ACCEL_CONFIG2, 0x02);
   // Set full scale range for the accelerometer to 2 g
   MPU9250_REG_WRITE(file, ACCEL_CONFIG, 1<<FS);
+
+  // get average current values of gyro and accelerometer
+  for( int ii = 0; ii < 200; ii++) {
+    // Read the six raw data registers into data array
+    MPU9250_REG_MULTI_READ(file, ACCEL_XOUT_H, 6, &rawData[0]);
+    // Turn the MSB and LSB into a signed 16-bit value
+    aAvg[0] += (int16_t)(((int16_t)rawData[0] << 8) | rawData[1]) ;
+    aAvg[1] += (int16_t)(((int16_t)rawData[2] << 8) | rawData[3]) ;
+    aAvg[2] += (int16_t)(((int16_t)rawData[4] << 8) | rawData[5]) ;
+
+    // Read the six raw data registers sequentially into data array
+    MPU9250_REG_MULTI_READ(file, GYRO_XOUT_H, 6, &rawData[0]);
+    // Turn the MSB and LSB into a signed 16-bit value
+    gAvg[0] += (int16_t)(((int16_t)rawData[0] << 8) | rawData[1]) ;
+    gAvg[1] += (int16_t)(((int16_t)rawData[2] << 8) | rawData[3]) ;
+    gAvg[2] += (int16_t)(((int16_t)rawData[4] << 8) | rawData[5]) ;
+  }
 }
 
-//
-//   for( int ii = 0; ii < 200; ii++) {  // get average current values of gyro and acclerometer
-//
-//     readBytes(MPU9250_ADDRESS, ACCEL_XOUT_H, 6, &rawData[0]);        // Read the six raw data registers into data array
-//     aAvg[0] += (int16_t)(((int16_t)rawData[0] << 8) | rawData[1]) ;  // Turn the MSB and LSB into a signed 16-bit value
-//     aAvg[1] += (int16_t)(((int16_t)rawData[2] << 8) | rawData[3]) ;
-//     aAvg[2] += (int16_t)(((int16_t)rawData[4] << 8) | rawData[5]) ;
-//
-//     readBytes(MPU9250_ADDRESS, GYRO_XOUT_H, 6, &rawData[0]);       // Read the six raw data registers sequentially into data array
-//     gAvg[0] += (int16_t)(((int16_t)rawData[0] << 8) | rawData[1]) ;  // Turn the MSB and LSB into a signed 16-bit value
-//     gAvg[1] += (int16_t)(((int16_t)rawData[2] << 8) | rawData[3]) ;
-//     gAvg[2] += (int16_t)(((int16_t)rawData[4] << 8) | rawData[5]) ;
-//   }
-//
+
 //   for (int ii =0; ii < 3; ii++) {  // Get average of 200 values and store as average current readings
 //     aAvg[ii] /= 200;
 //     gAvg[ii] /= 200;
