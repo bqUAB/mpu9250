@@ -28,7 +28,7 @@
 #include "quaternionFilters.h"
 #include "MPU9250.h"
 
-#define AHRS true         // Set to false for basic data read
+#define AHRS false        // Set to false for basic data read
 #define SerialDebug true  // Set to true to get Serial output for debugging
 
 // Pin definitions
@@ -215,107 +215,107 @@ void loop()
       digitalWrite(myLed, !digitalRead(myLed));  // toggle led
     } // if (myIMU.delt_t > 500)
   } // if (!AHRS)
-  else
-  {
-    // Serial print and/or display at 0.5 s rate independent of data rates
-    myIMU.delt_t = millis() - myIMU.count;
-
-    // update LCD once per half-second independent of read rate
-    if (myIMU.delt_t > 500)
-    {
-      if(SerialDebug)
-      {
-        Serial.print("ax = "); Serial.print((int)1000*myIMU.ax);
-        Serial.print(" ay = "); Serial.print((int)1000*myIMU.ay);
-        Serial.print(" az = "); Serial.print((int)1000*myIMU.az);
-        Serial.println(" mg");
-
-        Serial.print("gx = "); Serial.print( myIMU.gx, 2);
-        Serial.print(" gy = "); Serial.print( myIMU.gy, 2);
-        Serial.print(" gz = "); Serial.print( myIMU.gz, 2);
-        Serial.println(" deg/s");
-
-        Serial.print("mx = "); Serial.print( (int)myIMU.mx );
-        Serial.print(" my = "); Serial.print( (int)myIMU.my );
-        Serial.print(" mz = "); Serial.print( (int)myIMU.mz );
-        Serial.println(" mG");
-
-        Serial.print("q0 = "); Serial.print(*getQ());
-        Serial.print(" qx = "); Serial.print(*(getQ() + 1));
-        Serial.print(" qy = "); Serial.print(*(getQ() + 2));
-        Serial.print(" qz = "); Serial.println(*(getQ() + 3));
-      }
-
-// Define output variables from updated quaternion---these are Tait-Bryan
-// angles, commonly used in aircraft orientation. In this coordinate system,
-// the positive z-axis is down toward Earth. Yaw is the angle between Sensor
-// x-axis and Earth magnetic North (or true North if corrected for local
-// declination, looking down on the sensor positive yaw is counterclockwise.
-// Pitch is angle between sensor x-axis and Earth ground plane, toward the
-// Earth is positive, up toward the sky is negative. Roll is angle between
-// sensor y-axis and Earth ground plane, y-axis up is positive roll. These
-// arise from the definition of the homogeneous rotation matrix constructed
-// from quaternions. Tait-Bryan angles as well as Euler angles are
-// non-commutative; that is, the get the correct orientation the rotations
-// must be applied in the correct order which for this configuration is yaw,
-// pitch, and then roll.
-// For more see
-// http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-// which has additional links.
-      myIMU.yaw   = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
-                    *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
-                    - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
-      myIMU.pitch = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
-                    *(getQ()+2)));
-      myIMU.roll  = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
-                    *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
-                    - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
-      myIMU.pitch *= RAD_TO_DEG;
-      myIMU.yaw   *= RAD_TO_DEG;
-      // Declination of SparkFun Electronics (40°05'26.6"N 105°11'05.9"W) is
-      // 	8° 30' E  ± 0° 21' (or 8.5°) on 2016-07-19
-      // - http://www.ngdc.noaa.gov/geomag-web/#declination
-      myIMU.yaw   -= 8.5;
-      myIMU.roll  *= RAD_TO_DEG;
-
-      if(SerialDebug)
-      {
-        Serial.print("Yaw, Pitch, Roll: ");
-        Serial.print(myIMU.yaw, 2);
-        Serial.print(", ");
-        Serial.print(myIMU.pitch, 2);
-        Serial.print(", ");
-        Serial.println(myIMU.roll, 2);
-
-        Serial.print("rate = ");
-        Serial.print((float)myIMU.sumCount/myIMU.sum, 2);
-        Serial.println(" Hz");
-      }
-
-    // --------------------------------------------------------------------------
-    // - The following coment was kept for informational purposes, because the  -
-    // - ATmega328 on a breadboard has also a 8 MHz speed, but the external     -
-    // - display is not part of the current implementation                      -
-    // --------------------------------------------------------------------------
-    // With these settings the filter is updating at a ~145 Hz rate using the
-    // Madgwick scheme and >200 Hz using the Mahony scheme even though the
-    // display refreshes at only 2 Hz. The filter update rate is determined
-    // mostly by the mathematical steps in the respective algorithms, the
-    // processor speed (8 MHz for the 3.3V Pro Mini), and the magnetometer ODR:
-    // an ODR of 10 Hz for the magnetometer produce the above rates, maximum
-    // magnetometer ODR of 100 Hz produces filter update rates of 36 - 145 and
-    // ~38 Hz for the Madgwick and Mahony schemes, respectively. This is
-    // presumably because the magnetometer read takes longer than the gyro or
-    // accelerometer reads. This filter update rate should be fast enough to
-    // maintain accurate platform orientation for stabilization control of a
-    // fast-moving robot or quadcopter. Compare to the update rate of 200 Hz
-    // produced by the on-board Digital Motion Processor of Invensense's MPU6050
-    // 6 DoF and MPU9150 9DoF sensors. The 3.3 V 8 MHz Pro Mini is doing pretty
-    // well!
-
-      myIMU.count = millis();
-      myIMU.sumCount = 0;
-      myIMU.sum = 0;
-    } // if (myIMU.delt_t > 500)
-  } // if (AHRS)
+//  else
+//  {
+//    // Serial print and/or display at 0.5 s rate independent of data rates
+//    myIMU.delt_t = millis() - myIMU.count;
+//
+//    // update LCD once per half-second independent of read rate
+//    if (myIMU.delt_t > 500)
+//    {
+//      if(SerialDebug)
+//      {
+//        Serial.print("ax = "); Serial.print((int)1000*myIMU.ax);
+//        Serial.print(" ay = "); Serial.print((int)1000*myIMU.ay);
+//        Serial.print(" az = "); Serial.print((int)1000*myIMU.az);
+//        Serial.println(" mg");
+//
+//        Serial.print("gx = "); Serial.print( myIMU.gx, 2);
+//        Serial.print(" gy = "); Serial.print( myIMU.gy, 2);
+//        Serial.print(" gz = "); Serial.print( myIMU.gz, 2);
+//        Serial.println(" deg/s");
+//
+//        Serial.print("mx = "); Serial.print( (int)myIMU.mx );
+//        Serial.print(" my = "); Serial.print( (int)myIMU.my );
+//        Serial.print(" mz = "); Serial.print( (int)myIMU.mz );
+//        Serial.println(" mG");
+//
+//        Serial.print("q0 = "); Serial.print(*getQ());
+//        Serial.print(" qx = "); Serial.print(*(getQ() + 1));
+//        Serial.print(" qy = "); Serial.print(*(getQ() + 2));
+//        Serial.print(" qz = "); Serial.println(*(getQ() + 3));
+//      }
+//
+//// Define output variables from updated quaternion---these are Tait-Bryan
+//// angles, commonly used in aircraft orientation. In this coordinate system,
+//// the positive z-axis is down toward Earth. Yaw is the angle between Sensor
+//// x-axis and Earth magnetic North (or true North if corrected for local
+//// declination, looking down on the sensor positive yaw is counterclockwise.
+//// Pitch is angle between sensor x-axis and Earth ground plane, toward the
+//// Earth is positive, up toward the sky is negative. Roll is angle between
+//// sensor y-axis and Earth ground plane, y-axis up is positive roll. These
+//// arise from the definition of the homogeneous rotation matrix constructed
+//// from quaternions. Tait-Bryan angles as well as Euler angles are
+//// non-commutative; that is, the get the correct orientation the rotations
+//// must be applied in the correct order which for this configuration is yaw,
+//// pitch, and then roll.
+//// For more see
+//// http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+//// which has additional links.
+//      myIMU.yaw   = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
+//                    *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
+//                    - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
+//      myIMU.pitch = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
+//                    *(getQ()+2)));
+//      myIMU.roll  = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
+//                    *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
+//                    - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
+//      myIMU.pitch *= RAD_TO_DEG;
+//      myIMU.yaw   *= RAD_TO_DEG;
+//      // Declination of SparkFun Electronics (40°05'26.6"N 105°11'05.9"W) is
+//      // 	8° 30' E  ± 0° 21' (or 8.5°) on 2016-07-19
+//      // - http://www.ngdc.noaa.gov/geomag-web/#declination
+//      myIMU.yaw   -= 8.5;
+//      myIMU.roll  *= RAD_TO_DEG;
+//
+//      if(SerialDebug)
+//      {
+//        Serial.print("Yaw, Pitch, Roll: ");
+//        Serial.print(myIMU.yaw, 2);
+//        Serial.print(", ");
+//        Serial.print(myIMU.pitch, 2);
+//        Serial.print(", ");
+//        Serial.println(myIMU.roll, 2);
+//
+//        Serial.print("rate = ");
+//        Serial.print((float)myIMU.sumCount/myIMU.sum, 2);
+//        Serial.println(" Hz");
+//      }
+//
+//    // --------------------------------------------------------------------------
+//    // - The following coment was kept for informational purposes, because the  -
+//    // - ATmega328 on a breadboard has also a 8 MHz speed, but the external     -
+//    // - display is not part of the current implementation                      -
+//    // --------------------------------------------------------------------------
+//    // With these settings the filter is updating at a ~145 Hz rate using the
+//    // Madgwick scheme and >200 Hz using the Mahony scheme even though the
+//    // display refreshes at only 2 Hz. The filter update rate is determined
+//    // mostly by the mathematical steps in the respective algorithms, the
+//    // processor speed (8 MHz for the 3.3V Pro Mini), and the magnetometer ODR:
+//    // an ODR of 10 Hz for the magnetometer produce the above rates, maximum
+//    // magnetometer ODR of 100 Hz produces filter update rates of 36 - 145 and
+//    // ~38 Hz for the Madgwick and Mahony schemes, respectively. This is
+//    // presumably because the magnetometer read takes longer than the gyro or
+//    // accelerometer reads. This filter update rate should be fast enough to
+//    // maintain accurate platform orientation for stabilization control of a
+//    // fast-moving robot or quadcopter. Compare to the update rate of 200 Hz
+//    // produced by the on-board Digital Motion Processor of Invensense's MPU6050
+//    // 6 DoF and MPU9150 9DoF sensors. The 3.3 V 8 MHz Pro Mini is doing pretty
+//    // well!
+//
+//      myIMU.count = millis();
+//      myIMU.sumCount = 0;
+//      myIMU.sum = 0;
+//    } // if (myIMU.delt_t > 500)
+//  } // if (AHRS)
 }

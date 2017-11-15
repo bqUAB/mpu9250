@@ -21,6 +21,7 @@
 #include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
 #include <stdbool.h>        // Needed for bool type
 #include <unistd.h>         // Needed for write()
+#include <mpu9250.h>
 
 
 bool MPU9250_REG_WRITE(int file, uint8_t reg_add, uint8_t data){
@@ -85,12 +86,11 @@ int main(){
       exit(1);
   }
 
-  // Reading all the MPU 9250 registers
-  for(int i = 0; i < 127; i++){
-    uint8_t buf[2]  = {'\0'};  // Buffer to store data with terminating null
-    MPU9250_REG_READ(file, i, buf);
-    printf("%X\n", buf[0]);
-  }
+  uint8_t buf[2]  = {'\0'};  // Buffer to store data with terminating null
+  // Read the WHO_AM_I register, this is a good test of communication
+  MPU9250_REG_READ(file, WHO_AM_I_MPU9250, buf);
+  printf("WHO_AM_I: 0x%X\n", buf[0]);
+  printf("I should be: 0x71\n");
 
   return 0;
 }
