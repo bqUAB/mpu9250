@@ -12,7 +12,7 @@
 TARGET            = mpu_9250_demo
 
 # Here we add all *.c files that we want to compile
-CSRCS             = main.c
+CSRCS             = main.c mpu9250.c
 
 # Here we add the paths to all include directories
 INCS              = ../include
