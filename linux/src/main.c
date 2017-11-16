@@ -70,8 +70,45 @@ bool MPU9250_REG_MULTI_READ(int file, uint8_t reg_add,\
 		}
 	}
 
-
 	return bSuccess;
+}
+
+bool MPU9250_STRUCT_INI(struct _MPU9250 myIMU){
+  bool bSuccess = false;
+
+  enum Gscale {
+    GFS_250DPS = 0,
+    GFS_500DPS,
+    GFS_1000DPS,
+    GFS_2000DPS
+  };
+
+  enum Ascale {
+      AFS_2G = 0,
+      AFS_4G,
+      AFS_8G,
+      AFS_16G
+    };
+
+  // Specify sensor full scale
+  myIMU.Gscale = GFS_250DPS;
+  myIMU.Ascale = AFS_2G;
+
+  // Bias corrections for gyro and accelerometer
+  for(int i = 0; i < 3; i++){
+    myIMU.gyroBias[i]  = 0;
+    myIMU.accelBias[i] = 0;
+  }
+
+  printf("myIMU.Gscale = %d\n", myIMU.Gscale);
+  printf("myIMU.Ascale = %d\n", myIMU.Ascale);
+
+  for(int i = 0; i < 3; i++){
+    printf("myIMU.gyroBias[%d] = %.1f\n", i, myIMU.gyroBias[i]);
+    printf("myIMU.accelBias[%d] = %.1f\n", i, myIMU.accelBias[i]);
+  }
+
+  return bSuccess;
 }
 
 int main(){
@@ -110,28 +147,10 @@ int main(){
   /* ---------------------> Creating MPU9250 structure <--------------------- */
   struct _MPU9250 myIMU;
   // Set initial input parameters
-  enum Ascale {
-      AFS_2G = 0,
-      AFS_4G,
-      AFS_8G,
-      AFS_16G
-    };
-
-  // Specify sensor full scale
-  myIMU.Ascale = AFS_2G;
-
-  // Bias corrections for gyro and accelerometer
-  for(int i = 0; i < 3; i++){
-    myIMU.accelBias[i] = 0;
-  }
-
-  printf("myIMU.Ascale = %d\n", myIMU.Ascale);
-  for(int i = 0; i < 3; i++){
-    printf("myIMU.accelBias[%d] = %.1f\n", i, myIMU.accelBias[i]);
-  }
+  MPU9250_STRUCT_INI(myIMU);
 
   /* ----------> Start performing self test and reporting values <----------- */
-  MPU9250SelfTest(file, myIMU.SelfTest);
+  MPU9250_SELF_TEST(file, myIMU.SelfTest);
 
   // Accelerometer values
   printf("x-axis self test: acceleration trim within : ");

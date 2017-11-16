@@ -15,14 +15,21 @@ struct timespec req = {0};
 //==============================================================================
 
 // Accelerometer and gyroscope self test; check calibration wrt factory settings
-void MPU9250SelfTest(int file, float * destination){
+void MPU9250_SELF_TEST(int file, float * destination){
   // Should return percent deviation from factory trim values, +/- 14 or less
   // deviation is a pass
   uint8_t rawData[6] = {0, 0, 0, 0, 0, 0};
   uint8_t selfTest[6];
-  int16_t aAvg[3], aSTAvg[3];
+  int16_t gAvg[3], gSTAvg[3], aAvg[3], aSTAvg[3];
   float factoryTrim[6];
   uint8_t FS = 0;
+
+  // Set gyro sample rate to 1 kHz
+  MPU9250_REG_WRITE(file, SMPLRT_DIV, 0x00);
+  // Set gyro sample rate to 1 kHz and DLPF to 92 Hz
+  MPU9250_REG_WRITE(file, CONFIG, 0x02);
+  // Set full scale range for the gyro to 250 dps
+  MPU9250_REG_WRITE(file, GYRO_CONFIG, 1<<FS);
 
   // Set accelerometer rate to 1 kHz and bandwidth to 92 Hz
   MPU9250_REG_WRITE(file, ACCEL_CONFIG2, 0x02);
@@ -31,6 +38,13 @@ void MPU9250SelfTest(int file, float * destination){
 
   // get average current values of gyro and accelerometer
   for(int i = 0; i < 200; i++) {
+    // Read the six raw data registers sequentially into data array
+    MPU9250_REG_MULTI_READ(file, GYRO_XOUT_H, 6, &rawData[0]);
+    // Turn the MSB and LSB into a signed 16-bit value
+    gAvg[0] += (int16_t)(((int16_t)rawData[0] << 8) | rawData[1]) ;
+    gAvg[1] += (int16_t)(((int16_t)rawData[2] << 8) | rawData[3]) ;
+    gAvg[2] += (int16_t)(((int16_t)rawData[4] << 8) | rawData[5]) ;
+
     // Read the six raw data registers into data array
     MPU9250_REG_MULTI_READ(file, ACCEL_XOUT_H, 6, &rawData[0]);
     // Turn the MSB and LSB into a signed 16-bit value
