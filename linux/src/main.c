@@ -58,6 +58,22 @@ bool MPU9250_REG_READ(int file, uint8_t reg_add, uint8_t *data){
 	return bSuccess;
 }
 
+bool MPU9250_REG_MULTI_READ(int file, uint8_t reg_add,\
+                            uint8_t count, uint8_t *data){
+	bool bSuccess = false;
+
+	// write to define register
+	if (write(file, &reg_add, sizeof(reg_add)) == sizeof(reg_add)){
+		// read back value
+		if (read(file, data, count) == count){
+			bSuccess = true;
+		}
+	}
+
+
+	return bSuccess;
+}
+
 int main(){
 
   printf("===== MPU 9250 Demo using Linux =====\n");
@@ -79,8 +95,7 @@ int main(){
 
   /* ----------------------> Initiating communication <---------------------- */
   // Specify device address to communicate
-  uint8_t addr = 0b1101000;  // MPU 9250 address 0x68
-  if (ioctl(file, I2C_SLAVE, addr) < 0) {
+  if (ioctl(file, I2C_SLAVE, MPU9250_ADDRESS) < 0) {
       printf("Failed to acquire bus access and/or talk to slave.\n");
       /* ERROR HANDLING; you can check errno to see what went wrong */
       exit(1);
@@ -91,6 +106,42 @@ int main(){
   MPU9250_REG_READ(file, WHO_AM_I_MPU9250, buf);
   printf("WHO_AM_I: 0x%X\n", buf[0]);
   printf("I should be: 0x71\n");
+
+  /* ---------------------> Creating MPU9250 structure <--------------------- */
+  struct _MPU9250 myIMU;
+  // Set initial input parameters
+  enum Ascale {
+      AFS_2G = 0,
+      AFS_4G,
+      AFS_8G,
+      AFS_16G
+    };
+
+  // Specify sensor full scale
+  myIMU.Ascale = AFS_2G;
+
+  // Bias corrections for gyro and accelerometer
+  for(int i = 0; i < 3; i++){
+    myIMU.accelBias[i] = 0;
+  }
+
+  printf("myIMU.Ascale = %d\n", myIMU.Ascale);
+  for(int i = 0; i < 3; i++){
+    printf("myIMU.accelBias[%d] = %.1f\n", i, myIMU.accelBias[i]);
+  }
+
+  /* ----------> Start performing self test and reporting values <----------- */
+  MPU9250SelfTest(file, myIMU.SelfTest);
+
+  // Accelerometer values
+  printf("x-axis self test: acceleration trim within : ");
+  printf("%.0f%% of factory value\n", myIMU.SelfTest[0]);
+
+  printf("y-axis self test: acceleration trim within : ");
+  printf("%.0f%% of factory value\n", myIMU.SelfTest[1]);
+
+  printf("z-axis self test: acceleration trim within : ");
+  printf("%.0f%% of factory value\n", myIMU.SelfTest[2]);
 
   return 0;
 }
