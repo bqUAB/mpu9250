@@ -18,7 +18,7 @@ CSRCS             = main.c mpu9250.c
 INCS              = ../include
 
 # Here we add the standard libraries used
-LIBS              =
+LIBS              = -lm
 
 # Parameters for SCP upload. Set up SSH keys to bypass password prompt
 SCP_TARGET_IP   = 192.168.0.11
@@ -51,7 +51,7 @@ CFLAGS  += $(INCS:%=-I %)
 LDFLAGS += $(INCS:%=-I %)
 
 # Add standard libraries
-CFLAGS  += $(LIBS)
+LDFLAGS  += $(LIBS)
 
 # This is the default target if the user does just calls 'make'
 all: build size

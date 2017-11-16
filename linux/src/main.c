@@ -107,9 +107,41 @@ int main(){
   printf("WHO_AM_I: 0x%X\n", buf[0]);
   printf("I should be: 0x71\n");
 
+  /* ---------------------> Creating MPU9250 structure <--------------------- */
+  struct _MPU9250 myIMU;
+  // Set initial input parameters
+  enum Ascale {
+      AFS_2G = 0,
+      AFS_4G,
+      AFS_8G,
+      AFS_16G
+    };
+
+  // Specify sensor full scale
+  myIMU.Ascale = AFS_2G;
+
+  // Bias corrections for gyro and accelerometer
+  for(int i = 0; i < 3; i++){
+    myIMU.accelBias[i] = 0;
+  }
+
+  printf("myIMU.Ascale = %d\n", myIMU.Ascale);
+  for(int i = 0; i < 3; i++){
+    printf("myIMU.accelBias[%d] = %.1f\n", i, myIMU.accelBias[i]);
+  }
+
   /* ----------> Start performing self test and reporting values <----------- */
-  float * destination;
-  MPU9250SelfTest(file, destination);
+  MPU9250SelfTest(file, myIMU.SelfTest);
+
+  // Accelerometer values
+  printf("x-axis self test: acceleration trim within : ");
+  printf("%.0f%% of factory value\n", myIMU.SelfTest[0]);
+
+  printf("y-axis self test: acceleration trim within : ");
+  printf("%.0f%% of factory value\n", myIMU.SelfTest[1]);
+
+  printf("z-axis self test: acceleration trim within : ");
+  printf("%.0f%% of factory value\n", myIMU.SelfTest[2]);
 
   return 0;
 }
