@@ -9,9 +9,7 @@ bool MPU9250_REG_MULTI_READ(int file, uint8_t reg_add,\
 // Time to sleep, similar to delay function
 struct timespec req = {0};
 
-bool MPU9250_STRUCT_INI(struct _MPU9250 * myIMU){
-  bool bSuccess = false;
-
+void MPU9250_STRUCT_INI(struct _MPU9250 * myIMU){
   enum Gscale {
     GFS_250DPS = 0,
     GFS_500DPS,
@@ -35,8 +33,6 @@ bool MPU9250_STRUCT_INI(struct _MPU9250 * myIMU){
     myIMU->gyroBias[i]  = 0;
     myIMU->accelBias[i] = 0;
   }
-
-  return bSuccess;
 }
 
 //==============================================================================
@@ -168,4 +164,37 @@ void MPU9250_SELF_TEST(int file, float * destination){
     // Report percent differences
     destination[i+3] = 100.0*((float)(gSTAvg[i] - gAvg[i]))/factoryTrim[i+3];
   }
+}
+
+// Function which accumulates gyro and accelerometer data after device
+// initialization. It calculates the average of the at-rest readings and then
+// loads the resulting offsets into accelerometer and gyro bias registers.
+void MPU9250_CALIBRATE(int file, float * gyroBias, float * accelBias){
+  req.tv_sec = 0;
+  // uint8_t data[12]; // data array to hold accelerometer and gyro x, y, z, data
+  // uint16_t ii, packet_count, fifo_count;
+  // int32_t gyro_bias[3]  = {0, 0, 0}, accel_bias[3] = {0, 0, 0};
+
+  // reset device
+  // Write a one to bit 7 reset bit; toggle reset device
+  MPU9250_REG_WRITE(file, PWR_MGMT_1, 0x80);
+  req.tv_nsec = 100 * 1000000L;
+  nanosleep(&req, (struct timespec *)NULL);
+
+  // get stable time source; Auto select clock source to be PLL gyroscope
+  // reference if ready else use the internal oscillator, bits 2:0 = 001
+  MPU9250_REG_WRITE(file, PWR_MGMT_1, 0x01);
+  MPU9250_REG_WRITE(file, PWR_MGMT_2, 0x00);
+  req.tv_nsec = 200 * 1000000L;
+  nanosleep(&req, (struct timespec *)NULL);
+
+  // Configure device for bias calculation
+  MPU9250_REG_WRITE(file, INT_ENABLE, 0x00);    // Disable all interrupts
+  MPU9250_REG_WRITE(file, FIFO_EN, 0x00);       // Disable FIFO
+  MPU9250_REG_WRITE(file, PWR_MGMT_1, 0x00);    // Turn on internal clock source
+  MPU9250_REG_WRITE(file, I2C_MST_CTRL, 0x00);  // Disable I2C master
+  MPU9250_REG_WRITE(file, USER_CTRL, 0x00);     // Disable FIFO and I2C master modes
+  MPU9250_REG_WRITE(file, USER_CTRL, 0x0C);     // Reset FIFO and DMP
+  req.tv_nsec = 15 * 1000000L;
+  nanosleep(&req, (struct timespec *)NULL);
 }
