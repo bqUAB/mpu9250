@@ -23,7 +23,6 @@
 #include <unistd.h>         // Needed for write()
 #include <mpu9250.h>
 
-
 bool MPU9250_REG_WRITE(int file, uint8_t reg_add, uint8_t data){
   bool bSuccess = false;
   uint8_t w_buf[2];
@@ -73,44 +72,6 @@ bool MPU9250_REG_MULTI_READ(int file, uint8_t reg_add,\
 	return bSuccess;
 }
 
-bool MPU9250_STRUCT_INI(struct _MPU9250 myIMU){
-  bool bSuccess = false;
-
-  enum Gscale {
-    GFS_250DPS = 0,
-    GFS_500DPS,
-    GFS_1000DPS,
-    GFS_2000DPS
-  };
-
-  enum Ascale {
-      AFS_2G = 0,
-      AFS_4G,
-      AFS_8G,
-      AFS_16G
-    };
-
-  // Specify sensor full scale
-  myIMU.Gscale = GFS_250DPS;
-  myIMU.Ascale = AFS_2G;
-
-  // Bias corrections for gyro and accelerometer
-  for(int i = 0; i < 3; i++){
-    myIMU.gyroBias[i]  = 0;
-    myIMU.accelBias[i] = 0;
-  }
-
-  printf("myIMU.Gscale = %d\n", myIMU.Gscale);
-  printf("myIMU.Ascale = %d\n", myIMU.Ascale);
-
-  for(int i = 0; i < 3; i++){
-    printf("myIMU.gyroBias[%d] = %.1f\n", i, myIMU.gyroBias[i]);
-    printf("myIMU.accelBias[%d] = %.1f\n", i, myIMU.accelBias[i]);
-  }
-
-  return bSuccess;
-}
-
 int main(){
 
   printf("===== MPU 9250 Demo using Linux =====\n");
@@ -147,7 +108,16 @@ int main(){
   /* ---------------------> Creating MPU9250 structure <--------------------- */
   struct _MPU9250 myIMU;
   // Set initial input parameters
-  MPU9250_STRUCT_INI(myIMU);
+  printf("Setting initial input parameters...\n");
+  MPU9250_STRUCT_INI(&myIMU);
+  printf("myIMU.Gscale = %d\n", myIMU.Gscale);
+  printf("myIMU.Ascale = %d\n", myIMU.Ascale);
+
+  for(int i = 0; i < 3; i++){
+    printf("myIMU.gyroBias[%d] = %.1f\n", i, myIMU.gyroBias[i]);
+    printf("myIMU.accelBias[%d] = %.1f\n", i, myIMU.accelBias[i]);
+  }
+  printf("\n");
 
   /* ----------> Start performing self test and reporting values <----------- */
   MPU9250_SELF_TEST(file, myIMU.SelfTest);
@@ -161,6 +131,16 @@ int main(){
 
   printf("z-axis self test: acceleration trim within : ");
   printf("%.0f%% of factory value\n", myIMU.SelfTest[2]);
+
+  // Gyroscope values
+  printf("x-axis self test: gyration trim within : ");
+  printf("%.0f%% of factory value\n", myIMU.SelfTest[3]);
+
+  printf("y-axis self test: gyration trim within : ");
+  printf("%.0f%% of factory value\n", myIMU.SelfTest[4]);
+
+  printf("z-axis self test: gyration trim within : ");
+  printf("%.0f%% of factory value\n", myIMU.SelfTest[5]);
 
   return 0;
 }

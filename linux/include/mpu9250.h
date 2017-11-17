@@ -62,6 +62,7 @@ typedef struct _MPU9250 {  // struct is a data type so you cannot set initial
 
 } MPU9250;
 
+bool MPU9250_STRUCT_INI(struct _MPU9250 * myIMU);
 void MPU9250_SELF_TEST(int file, float * destination);
 
 #endif // _MPU9250_H_
