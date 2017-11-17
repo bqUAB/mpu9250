@@ -23,7 +23,6 @@
 #include <unistd.h>         // Needed for write()
 #include <mpu9250.h>
 
-
 bool MPU9250_REG_WRITE(int file, uint8_t reg_add, uint8_t data){
   bool bSuccess = false;
   uint8_t w_buf[2];
@@ -70,7 +69,6 @@ bool MPU9250_REG_MULTI_READ(int file, uint8_t reg_add,\
 		}
 	}
 
-
 	return bSuccess;
 }
 
@@ -110,28 +108,19 @@ int main(){
   /* ---------------------> Creating MPU9250 structure <--------------------- */
   struct _MPU9250 myIMU;
   // Set initial input parameters
-  enum Ascale {
-      AFS_2G = 0,
-      AFS_4G,
-      AFS_8G,
-      AFS_16G
-    };
-
-  // Specify sensor full scale
-  myIMU.Ascale = AFS_2G;
-
-  // Bias corrections for gyro and accelerometer
-  for(int i = 0; i < 3; i++){
-    myIMU.accelBias[i] = 0;
-  }
-
+  printf("Setting initial input parameters...\n");
+  MPU9250_STRUCT_INI(&myIMU);
+  printf("myIMU.Gscale = %d\n", myIMU.Gscale);
   printf("myIMU.Ascale = %d\n", myIMU.Ascale);
+
   for(int i = 0; i < 3; i++){
+    printf("myIMU.gyroBias[%d] = %.1f\n", i, myIMU.gyroBias[i]);
     printf("myIMU.accelBias[%d] = %.1f\n", i, myIMU.accelBias[i]);
   }
+  printf("\n");
 
   /* ----------> Start performing self test and reporting values <----------- */
-  MPU9250SelfTest(file, myIMU.SelfTest);
+  MPU9250_SELF_TEST(file, myIMU.SelfTest);
 
   // Accelerometer values
   printf("x-axis self test: acceleration trim within : ");
@@ -142,6 +131,16 @@ int main(){
 
   printf("z-axis self test: acceleration trim within : ");
   printf("%.0f%% of factory value\n", myIMU.SelfTest[2]);
+
+  // Gyroscope values
+  printf("x-axis self test: gyration trim within : ");
+  printf("%.0f%% of factory value\n", myIMU.SelfTest[3]);
+
+  printf("y-axis self test: gyration trim within : ");
+  printf("%.0f%% of factory value\n", myIMU.SelfTest[4]);
+
+  printf("z-axis self test: gyration trim within : ");
+  printf("%.0f%% of factory value\n", myIMU.SelfTest[5]);
 
   return 0;
 }
