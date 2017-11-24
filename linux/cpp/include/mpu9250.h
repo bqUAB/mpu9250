@@ -185,12 +185,15 @@ class MPU9250
 
   public:
 
+  private:
+    void chooseDevice(uint8_t devAdd);
+
   public:
-    void open_i2c();
-    void choose_device(uint8_t dev_add);
-    void writeByte(uint8_t reg_add, uint8_t data);
-    uint8_t readByte(uint8_t reg_add);
-    void readBytes(uint8_t reg_add, uint8_t count, uint8_t * data);
+    void openI2C();
+    void comTest(uint8_t WHO_AM_I);
+    void writeByte(uint8_t regAdd, uint8_t data);
+    uint8_t readByte(uint8_t regAdd);
+    void readBytes(uint8_t regAdd, uint8_t count, uint8_t * data);
     void MPU9250SelfTest(float * destination);
 };  // class MPU9250
 

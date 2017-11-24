@@ -22,15 +22,11 @@ MPU9250 myIMU;
 int main(){
 
   printf("===== MPU 9250 Demo using Linux =====\n");
-  myIMU.open_i2c();
+  myIMU.openI2C();
   // Initiating communication
-  myIMU.choose_device(MPU9250_ADDRESS);
-/*
-  // Read the WHO_AM_I register, this is a good test of communication
-  uint8_t c = myIMU.readByte(file, WHO_AM_I_MPU9250);
-  printf("WHO_AM_I: %#X\t", c);
-  printf("I should be: 0x71\n");
+  myIMU.comTest(WHO_AM_I_MPU9250);
 
+/*
   if (c == 0x71){  // WHO_AM_I should always be 0x71
     printf("MPU9250 is online...\n");
 
