@@ -25,7 +25,7 @@ void MPU9250::chooseDevice(uint8_t devAdd){
   }
 }
 
-void MPU9250::comTest(uint8_t WHO_AM_I){
+uint8_t MPU9250::comTest(uint8_t WHO_AM_I){
   // Read the WHO_AM_I register, this is a good test of communication
   uint8_t c;
 
@@ -40,6 +40,7 @@ void MPU9250::comTest(uint8_t WHO_AM_I){
   }
 
   printf("WHO_AM_I: %#X\n", c);
+  return c;
 }
 
 // Linux I2C read and write protocols
