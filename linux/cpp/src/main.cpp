@@ -19,7 +19,9 @@
 #include <fcntl.h>          // Needed for open()
 #include <sys/ioctl.h>      // Needed for ioctl
 #include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
-//#include <mpu9250.h>
+#include <mpu9250.h>
+
+MPU9250 myIMU;
 
 int main(){
 
@@ -42,13 +44,16 @@ int main(){
 
   /* ----------------------> Initiating communication <---------------------- */
   // Specify device address to communicate
-  if (ioctl(file, I2C_SLAVE, 0x68) < 0) {
+  if (ioctl(file, I2C_SLAVE, MPU9250_ADDRESS) < 0) {
       printf("Failed to acquire bus access and/or talk to slave.\n");
       /* ERROR HANDLING; you can check errno to see what went wrong */
       exit(1);
   }
 
-  printf("Communication Successful!\n");
+  // Read the WHO_AM_I register, this is a good test of communication
+  uint8_t c = myIMU.readByte(file, WHO_AM_I_MPU9250);
+  printf("WHO_AM_I: 0x%X\n", c);
+  printf("I should be: 0x71\n");
 
   return 0;
 }

@@ -3,36 +3,36 @@
 # Tested on SoC EDS 16.1 on Windows 7 64-Bit                                   #
 #                                                                              #
 # Copyright (C) 2015 by Joel Bodenmann <joel@embedded.pro>                     #
-# Modified 24 November 2017 by Byron Quezada <github.com/bqUAB>                #
+# Modified 10 November 2017 by Byron Quezada <github.com/bqUAB>                #
 #                                                                              #
 # Feel free to use this makefile without any warranty on your own risk.        #
 ################################################################################
 
 # This is the name of the binaries that will be generated
-TARGET  = mpu_9250_demo
+TARGET            = mpu_9250_demo
 
-# Here we add all *.cpp files that we want to compile
-CPPSRCS = main.cpp mpu9250.cpp
+# Here we add all *.c files that we want to compile
+CSRCS             = main.c mpu9250.c
 
 # Here we add the paths to all include directories
-INCS    = ../include
+INCS              = ../include
 
 # Here we add the standard libraries used
-LIBS    = -lm
+LIBS              = -lm
 
 # Parameters for SCP upload. Set up SSH keys to bypass password prompt
-SCP_TARGET_IP   = 192.168.0.12
-SCP_USER        = pi
-SCP_TARGET_PATH = /home/pi/bin
+SCP_TARGET_IP   = 192.168.0.11
+SCP_USER        = debian
+SCP_TARGET_PATH = /home/debian/bin
 SCP             = scp
 SCP_FLAGS       =
 
 # Compiler settings
-ARCH     = arm-linux-gnueabihf
-CPPC     = $(ARCH)-g++
-SIZE     = $(ARCH)-size
-CPPFLAGS = -g -std=c++11 -Wall
-LDFLAGS  = -g -Wall
+ARCH    = arm-linux-gnueabihf
+CC      = $(ARCH)-gcc
+SIZE    = $(ARCH)-size
+CFLAGS  = -g -std=gnu99 -Wall
+LDFLAGS = -g -Wall
 
 ################################################################################
 # Don't change anything below this line                                        #
@@ -44,11 +44,11 @@ BUILDDIR = ../build
 OBJDIR   = $(BUILDDIR)/obj
 
 # Generate the object names
-OBJS = $(addprefix $(OBJDIR)/,$(addsuffix .o,$(basename $(CPPSRCS:%.c=%.o))))
+OBJS = $(addprefix $(OBJDIR)/,$(addsuffix .o,$(basename $(CSRCS:%.c=%.o))))
 
 # Add some paths
-CPPFLAGS += $(INCS:%=-I %)
-LDFLAGS  += $(INCS:%=-I %)
+CFLAGS  += $(INCS:%=-I %)
+LDFLAGS += $(INCS:%=-I %)
 
 # Add standard libraries
 LDFLAGS  += $(LIBS)
@@ -71,14 +71,14 @@ builddirs:
 $(BINDIR)/$(TARGET): $(OBJS)
 	@echo
 	@echo Linking $@
-	@$(CPPC) $(LDFLAGS) -o $(BINDIR)/$(TARGET) $(OBJS)
+	@$(CC) $(LDFLAGS) -o $(BINDIR)/$(TARGET) $(OBJS)
 
 # Compile c files
-$(OBJDIR)/%.o: %.cpp
+$(OBJDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	@echo
 	@echo Compiling $^
-	@$(CPPC) $(CPPFLAGS) -c -o $@ $^
+	@$(CC) $(CFLAGS) -c -o $@ $^
 
 # Print size information
 size: $(BINDIR)/$(TARGET)
