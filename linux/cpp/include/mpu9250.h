@@ -4,8 +4,13 @@
 #ifndef _MPU9250_H_
 #define _MPU9250_H_
 
-#include <stdint.h>   // Needed for unit uint8_t data type
-#include <unistd.h>   // Needed for write, usleep
+#include <stdint.h>         // Needed for unit uint8_t data type
+#include <stdio.h>          // Needed for printf, snprintf, perror
+#include <fcntl.h>          // Needed for open()
+#include <stdlib.h>         // Needed for exit()
+#include <unistd.h>         // Needed for write, usleep
+#include <sys/ioctl.h>      // Needed for ioctl
+#include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
 //#include <math.h>     // Needed for pow
 
 // See also MPU-9250 Register Map and Descriptions, Revision 6.0,
@@ -176,13 +181,16 @@
 class MPU9250
 {
   protected:
+    int file;
 
   public:
 
   public:
-    void writeByte(int file, uint8_t reg_add, uint8_t data);
-    uint8_t readByte(int file, uint8_t reg_add);
-    void readBytes(int file, uint8_t reg_add, uint8_t count, uint8_t * data);
+    void open_i2c();
+    void choose_device(uint8_t dev_add);
+    void writeByte(uint8_t reg_add, uint8_t data);
+    uint8_t readByte(uint8_t reg_add);
+    void readBytes(uint8_t reg_add, uint8_t count, uint8_t * data);
     void MPU9250SelfTest(float * destination);
 };  // class MPU9250
 
