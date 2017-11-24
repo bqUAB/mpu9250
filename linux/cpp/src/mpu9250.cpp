@@ -112,17 +112,17 @@ int16_t MPU9250::readTempData()
 }
 
 // Calculate the time the last update took for use in the quaternion filters
-void MPU9250::updateTime()
-{
-  Now = micros();
-
-  // Set integration time by time elapsed since last filter update
-  deltat = ((Now - lastUpdate) / 1000000.0f);
-  lastUpdate = Now;
-
-  sum += deltat; // sum for averaging filter update rate
-  sumCount++;
-}
+// void MPU9250::updateTime()
+// {
+//   Now = micros();
+//
+//   // Set integration time by time elapsed since last filter update
+//   deltat = ((Now - lastUpdate) / 1000000.0f);
+//   lastUpdate = Now;
+//
+//   sum += deltat; // sum for averaging filter update rate
+//   sumCount++;
+// }
 
 void MPU9250::initAK8963(float * destination)
 {
@@ -441,34 +441,52 @@ void MPU9250::MPU9250SelfTest(float * destination) // Should return percent devi
 }
 
 
-// Wire.h read and write protocols
-void MPU9250::writeByte(uint8_t address, uint8_t subAddress, uint8_t data)
-{
-  Wire.beginTransmission(address);  // Initialize the Tx buffer
-  Wire.write(subAddress);           // Put slave register address in Tx buffer
-  Wire.write(data);                 // Put data in Tx buffer
-  Wire.endTransmission();           // Send the Tx buffer
+// Linux I2C read and write protocols
+void MPU9250::writeByte(int file, uint8_t reg_add, uint8_t data){
+
+  //uint8_t bSuccess = 0;
+
+  uint8_t w_buf[2];
+
+  // Write to define register
+  w_buf[0] = reg_add;
+  w_buf[1] = data;
+  if (write(file, &w_buf, sizeof(w_buf)) == sizeof(w_buf)){
+    //bSuccess = 1;
+  } else {
+    /* ERROR HANDLING: i2c transaction failed */
+    //bSuccess = 0;
+  }
 }
 
-uint8_t MPU9250::readByte(uint8_t address, uint8_t subAddress)
-{
+uint8_t MPU9250::readByte(int file, uint8_t reg_add){
+
+  //uint8_t bSuccess = 0;
+
   uint8_t data; // `data` will store the register data
-  Wire.beginTransmission(address);         // Initialize the Tx buffer
-  Wire.write(subAddress);                  // Put slave register address in Tx buffer
-  Wire.endTransmission(false);             // Send the Tx buffer, but send a restart to keep connection alive
-  Wire.requestFrom(address, (uint8_t) 1);  // Read one byte from slave register address
-  data = Wire.read();                      // Fill Rx buffer with result
-  return data;                             // Return data read from slave register
+
+  // write to define register
+  if (write(file, &reg_add, sizeof(reg_add)) == sizeof(reg_add)){
+
+    // read back value
+    if (read(file, &data, sizeof(data)) == sizeof(data)){
+      //bSuccess = 1;
+    }
+  }
+
+  return data;  // Return data read from slave register
 }
 
-void MPU9250::readBytes(uint8_t address, uint8_t subAddress, uint8_t count,
-                        uint8_t * dest)
-{
-  Wire.beginTransmission(address);   // Initialize the Tx buffer
-  Wire.write(subAddress);            // Put slave register address in Tx buffer
-  Wire.endTransmission(false);       // Send the Tx buffer, but send a restart to keep connection alive
-  uint8_t i = 0;
-  Wire.requestFrom(address, count);  // Read bytes from slave register address
-  while (Wire.available()) {
-    dest[i++] = Wire.read(); }         // Put read results in the Rx buffer
+void MPU9250::readBytes(int file, uint8_t reg_add, uint8_t count,
+                        uint8_t * data){
+
+  //uint8_t bSuccess = 0;
+
+  // write to define register
+  if (write(file, &reg_add, sizeof(reg_add)) == sizeof(reg_add)){
+    // read back value
+    if (read(file, data, count) == count){
+      //bSuccess = 1;
+    }
+  }
 }

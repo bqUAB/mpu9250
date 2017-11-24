@@ -5,7 +5,6 @@
 #define _MPU9250_H_
 
 #include <stdint.h>   // Needed for unit uint8_t data type
-#include <stdbool.h>  // Needed for bool type
 #include <unistd.h>   // Needed for usleep
 #include <math.h>     // Needed for pow
 
@@ -238,14 +237,14 @@ class MPU9250
     void readGyroData(int16_t *);
     void readMagData(int16_t *);
     int16_t readTempData();
-    void updateTime();
+    //void updateTime();
     void initAK8963(float *);
     void initMPU9250();
     void calibrateMPU9250(float * gyroBias, float * accelBias);
     void MPU9250SelfTest(float * destination);
-    void writeByte(uint8_t, uint8_t, uint8_t);
-    uint8_t readByte(uint8_t, uint8_t);
-    void readBytes(uint8_t, uint8_t, uint8_t, uint8_t *);
+    void writeByte(int file, uint8_t reg_add, uint8_t data);
+    uint8_t readByte(int file, uint8_t reg_add);
+    void readBytes(int file, uint8_t reg_add, uint8_t count, uint8_t * data);
 };  // class MPU9250
 
 #endif // _MPU9250_H_

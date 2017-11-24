@@ -12,7 +12,7 @@
 TARGET  = mpu_9250_demo
 
 # Here we add all *.cpp files that we want to compile
-CPPSRCS = main.cpp #mpu9250.cpp
+CPPSRCS = main.cpp mpu9250.cpp
 
 # Here we add the paths to all include directories
 INCS    = ../include
