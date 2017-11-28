@@ -11,7 +11,7 @@
 #include <unistd.h>         // Needed for write, usleep
 #include <sys/ioctl.h>      // Needed for ioctl
 #include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
-//#include <math.h>     // Needed for pow
+#include <math.h>           // Needed for pow
 
 // See also MPU-9250 Register Map and Descriptions, Revision 6.0,
 // RM-MPU-9250A-00, Rev. 1.6, 01/07/2015 for registers not listed in above
@@ -203,6 +203,9 @@ class MPU9250
     uint8_t Ascale = AFS_2G;
 
   public:
+    float SelfTest[6];
+    // Bias corrections for gyro and accelerometer
+    float gyroBias[3] = {0, 0, 0}, accelBias[3] = {0, 0, 0};
 
   private:
     void chooseDevice(uint8_t devAdd);
@@ -213,6 +216,8 @@ class MPU9250
     uint8_t readByte(uint8_t regAdd);
     void readBytes(uint8_t regAdd, uint8_t count, uint8_t * data);
     uint8_t comTest(uint8_t WHO_AM_I);
+    void MPU9250SelfTest(float * destination);
+    void calibrateMPU9250(float * gyroBias, float * accelBias);
     void initMPU9250();
 };  // class MPU9250
 

@@ -28,25 +28,31 @@ int main(){
 
   if (c == 0x71){  // WHO_AM_I should always be 0x71
     printf("MPU9250 is online...\n");
-    printf("Initializing MPU9250...\n");
-    myIMU.initMPU9250();
 
     // Start by performing self test and reporting values
-    // myIMU.MPU9250SelfTest(myIMU.SelfTest);
-    // printf("Accelerometer Self Test\n");
-    // printf("x-axis self test: acceleration trim within : ");
-    // printf("% 0.2f%% of factory value\n", myIMU.SelfTest[0]);
-    // printf("y-axis self test: acceleration trim within : ");
-    // printf("% 0.2f%% of factory value\n", myIMU.SelfTest[1]);
-    // printf("z-axis self test: acceleration trim within : ");
-    // printf("% 0.2f%% of factory value\n", myIMU.SelfTest[2]);
-    // printf("Gyroscope Self Test\n");
-    // printf("x-axis self test: gyration trim within : ");
-    // printf("% 0.2f%% of factory value\n", myIMU.SelfTest[3]);
-    // printf("y-axis self test: gyration trim within : ");
-    // printf("% 0.2f%% of factory value\n", myIMU.SelfTest[4]);
-    // printf("z-axis self test: gyration trim within : ");
-    // printf("% 0.2f%% of factory value\n", myIMU.SelfTest[5]);
+    myIMU.MPU9250SelfTest(myIMU.SelfTest);
+    printf("Accelerometer Self Test\n");
+    printf("x-axis self test: acceleration trim within : ");
+    printf("% 0.2f%% of factory value\n", myIMU.SelfTest[0]);
+    printf("y-axis self test: acceleration trim within : ");
+    printf("% 0.2f%% of factory value\n", myIMU.SelfTest[1]);
+    printf("z-axis self test: acceleration trim within : ");
+    printf("% 0.2f%% of factory value\n", myIMU.SelfTest[2]);
+    printf("Gyroscope Self Test\n");
+    printf("x-axis self test: gyration trim within : ");
+    printf("% 0.2f%% of factory value\n", myIMU.SelfTest[3]);
+    printf("y-axis self test: gyration trim within : ");
+    printf("% 0.2f%% of factory value\n", myIMU.SelfTest[4]);
+    printf("z-axis self test: gyration trim within : ");
+    printf("% 0.2f%% of factory value\n", myIMU.SelfTest[5]);
+
+    // Calibrate gyro and accelerometer, load biases in bias registers
+    myIMU.calibrateMPU9250(myIMU.gyroBias, myIMU.accelBias);
+
+    // Initialize device for active mode read of accelerometer, gyroscope, and
+    // temperature
+    printf("Initializing MPU9250for active data mode...\n");
+    myIMU.initMPU9250();
   }
 
   return 0;
