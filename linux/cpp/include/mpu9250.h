@@ -191,8 +191,16 @@ class MPU9250
       GFS_2000DPS
     };
 
+    enum Ascale {
+      AFS_2G = 0,
+      AFS_4G,
+      AFS_8G,
+      AFS_16G
+    };
+
     // Specify sensor full scale
     uint8_t Gscale = GFS_250DPS;
+    uint8_t Ascale = AFS_2G;
 
   public:
 

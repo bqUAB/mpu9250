@@ -128,8 +128,33 @@ void MPU9250::initMPU9250(){
   // c =| 0x00;  // Set Fchoice for the gyro to 11 by writing its inverse to
                  //bits 1:0 of GYRO_CONFIG
   writeByte(GYRO_CONFIG, c);  // Write new ACCEL_CONFIG2 register value
+
+  /* Set accelerometer full-scale range configuration */
+  c = readByte(ACCEL_CONFIG); // Get current ACCEL_CONFIG register value
+  // c = c & ~0xE0;  // Clear self-test bits [7:5]
+  c = c & ~0x18;  // Clear AFS bits [4:3]
+  c = c & Ascale << 3;  // Set full scale range for the accelerometer
+  writeByte(ACCEL_CONFIG, c);  // Write new ACCEL_CONFIG register value
+
+  /* Set accelerometer sample rate configuration */
+  // It is possible to get a 4 kHz sample rate from the accelerometer by
+  // choosing 1 for accel_fchoice_b bit [3]; in this case the bandwith is
+  // 1.13 kHz
+  c = readByte(ACCEL_CONFIG2);  // get current ACCEL_CONFIG2 register value
+  c = c & ~0x0F;  // Clear accel_fchoice_b (bit 3) and A_DLPFG (bits [2:0])
+  c = c | 0x03;  // Set accelerometer rate to 1 kHz and bandwith to 41 Hz
+  writeByte(ACCEL_CONFIG2, c);  // Write a new ACCEL_CONFIG2 register value
   // The accelerometer, gyro, and thermometer are set to 1 kHz sample rates,
   // but all these rates are further reduced by a factor of 5 to 200 Hz because
   // of the SMPLRT_DIV setting
+
+  /* Configure Interrupts and Bypass Enable */
+  // Set interrupt pin active high, push-pull, hold interrupt pin level HIGH
+  // until interrupt cleared, clear on read of INT_STATUS, and enable
+  // I2C_BYPASS_EN so additional chips can join the I2C bus and all can be
+  // controlled by Linux as master
+  writeByte(INT_PIN_CFG, 0x22);
+  writeByte(INT_ENABLE, 0X01);  // Enable data ready (bit 0) interrupt
+  usleep(100*1000);
 
 }
