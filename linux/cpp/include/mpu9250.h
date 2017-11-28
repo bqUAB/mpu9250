@@ -1,5 +1,5 @@
 /*
- Note: The MPU9250 is an I2C sensor and uses the I2C Linux driver.
+ * Note: The MPU9250 is an I2C sensor and uses the I2C Linux driver.
  */
 #ifndef _MPU9250_H_
 #define _MPU9250_H_
@@ -13,9 +13,9 @@
 #include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
 #include <math.h>           // Needed for pow
 
-// See also MPU-9250 Register Map and Descriptions, Revision 6.0,
-// RM-MPU-9250A-00, Rev. 1.6, 01/07/2015 for registers not listed in above
-// document.
+/* See also MPU-9250 Register Map and Descriptions, Revision 6.0,
+ * RM-MPU-9250A-00, Rev. 1.6, 01/07/2015 for registers not listed in above
+ * document. */
 
 //Magnetometer Registers
 #define AK8963_ADDRESS   0x0C
@@ -70,13 +70,13 @@
 #define LP_ACCEL_ODR      0x1E
 #define WOM_THR           0x1F
 
-// Duration counter threshold for motion interrupt generation, 1 kHz rate,
-// LSB = 1 ms
+/* Duration counter threshold for motion interrupt generation, 1 kHz rate,
+ * LSB = 1 ms*/
 #define MOT_DUR           0x20
-// Zero-motion detection threshold bits [7:0]
+/* Zero-motion detection threshold bits [7:0] */
 #define ZMOT_THR          0x21
-// Duration counter threshold for zero motion interrupt generation, 16 Hz rate,
-// LSB = 64 ms
+/* Duration counter threshold for zero motion interrupt generation, 16 Hz rate,
+ * LSB = 64 ms */
 #define ZRMOT_DUR         0x22
 
 #define FIFO_EN            0x23
@@ -168,8 +168,8 @@
 #define ZA_OFFSET_H        0x7D
 #define ZA_OFFSET_L        0x7E
 
-// Using the MPU-9250 breakout board, ADO is set to 0
-// Seven-bit device address is 110100 for ADO = 0 and 110101 for ADO = 1
+/* Using the MPU-9250 breakout board, ADO is set to 0
+ * Seven-bit device address is 110100 for ADO = 0 and 110101 for ADO = 1 */
 #define ADO 0
 #if ADO
 #define MPU9250_ADDRESS 0x69  // Device address when ADO = 1
@@ -183,7 +183,7 @@ class MPU9250
   protected:
     int file;
 
-    // Set initial input parameters
+    /* Set initial input parameters */
     enum Gscale {
       GFS_250DPS = 0,
       GFS_500DPS,
@@ -198,14 +198,31 @@ class MPU9250
       AFS_16G
     };
 
-    // Specify sensor full scale
+    enum Mscale {
+      MFS_14BITS = 0, // 0.6 mG per LSB
+      MFS_16BITS      // 0.15 mG per LSB
+    };
+
+    /* Specify sensor full scale */
     uint8_t Gscale = GFS_250DPS;
     uint8_t Ascale = AFS_2G;
+    /* Choose either 14-bit or 16-bit magnetometer resolution */
+    uint8_t Mscale = MFS_16BITS;
+    /* 2 for 8 Hz, 6 for 100 Hz continuous magnetometer data read */
+    uint8_t Mmode = 0x02;
 
   public:
     float SelfTest[6];
-    // Bias corrections for gyro and accelerometer
+    /* Bias corrections for gyro and accelerometer */
     float gyroBias[3] = {0, 0, 0}, accelBias[3] = {0, 0, 0};
+    /* Factory magnetometer calibration and magnetometer bias */
+    float magCalibration[3] = {0, 0, 0}, magbias[3] = {0, 0, 0};
+    /* Stores the 16-bit signed accelerometer sensor output */
+    int16_t accelCount[3];
+    // Scale resolutions per LSB for the sensors
+    float aRes, gRes, mRes;
+    // Variables to hold latest sensor data values
+    float ax, ay, az, gx, gy, gz, mx, my, mz;
 
   private:
     void chooseDevice(uint8_t devAdd);
@@ -219,6 +236,9 @@ class MPU9250
     void MPU9250SelfTest(float * destination);
     void calibrateMPU9250(float * gyroBias, float * accelBias);
     void initMPU9250();
+    void initAK8963(float *);
+    void readAccelData(int16_t * destination);
+    void getAres();
 };  // class MPU9250
 
 #endif // _MPU9250_H_
