@@ -96,7 +96,7 @@ void loop(){ while(1){  // Arduino loop like
     myIMU.readAccelData(myIMU.accelCount);  // Read the x/y/z adc values
     myIMU.getAres();
 
-    /* Now we'll calculate the accleration value into actual g's
+    /* Now we'll calculate the acceleration value into actual g's
      * This depends on scale being set */
     myIMU.ax = (float)myIMU.accelCount[0]*myIMU.aRes;  // - accelBias[0];
     myIMU.ay = (float)myIMU.accelCount[1]*myIMU.aRes;  // - accelBias[1];
@@ -110,5 +110,44 @@ void loop(){ while(1){  // Arduino loop like
     myIMU.gx = (float)myIMU.gyroCount[0]*myIMU.gRes;
     myIMU.gy = (float)myIMU.gyroCount[1]*myIMU.gRes;
     myIMU.gz = (float)myIMU.gyroCount[2]*myIMU.gRes;
+
+    myIMU.readMagData(myIMU.magCount);  // Read the x/y/z adc values
+    myIMU.getMres();
+    /* User environmental x-axis correction in milliGauss, should be
+     * automatically calculated */
+    myIMU.magbias[0] = +470.;
+    // User environmental y-axis correction in milliGauss TODO axis??
+    myIMU.magbias[1] = +120.;
+    // User environmental z-axis correction in milliGauss
+    myIMU.magbias[2] = +125.;
+
+    /* Calculate the magnetometer values in milliGauss
+     * Include factory calibration per data sheet and user environmental
+     * corrections
+     * Get actual magnetometer value, this depends on scale being set */
+    myIMU.mx = (float)myIMU.magCount[0]*myIMU.mRes*myIMU.magCalibration[0] -
+              myIMU.magbias[0];
+    myIMU.my = (float)myIMU.magCount[1]*myIMU.mRes*myIMU.magCalibration[1] -
+              myIMU.magbias[1];
+    myIMU.mz = (float)myIMU.magCount[2]*myIMU.mRes*myIMU.magCalibration[2] -
+              myIMU.magbias[2];
   }
+
+  /* Print acceleration values in milligs! */
+  printf("X-acceleration: % 0.2f mg\n", 1000*myIMU.ax);
+  printf("Y-acceleration: % 0.2f mg\n", 1000*myIMU.ay);
+  printf("Z-acceleration: % 0.2f mg\n", 1000*myIMU.az);
+
+  /* Print gyro values in degree/sec */
+  printf("X-gyro rate: % 0.2f degrees/sec\n", myIMU.gx);
+  printf("Y-gyro rate: % 0.2f degrees/sec\n", myIMU.gy);
+  printf("Z-gyro rate: % 0.2f degrees/sec\n", myIMU.gz);
+
+  /* Print mag values in degree/sec */
+  printf("X-mag field: % 0.2f mG\n", myIMU.mx);
+  printf("Y-mag field: % 0.2f mG\n", myIMU.my);
+  printf("Z-mag field: % 0.2f mG\n", myIMU.mz);
+
+  usleep(0.5*1000000);
+
 }}

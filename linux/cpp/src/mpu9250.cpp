@@ -150,7 +150,7 @@ void MPU9250::MPU9250SelfTest(float * destination){
   writeByte(ACCEL_CONFIG, 0xE0);
   usleep(25*1000);  // Delay a while to let the device stabilize
 
-  /* -------> get average self-test values of gyro and acclerometer <------- */
+  /* -------> get average self-test values of gyro and acclerometer <-------- */
   for( int i = 0; i < 200; i++) {
 
     /* Read the six raw data registers into data array */
@@ -507,6 +507,28 @@ void MPU9250::readGyroData(int16_t * destination){
   destination[2] = ((int16_t)rawData[4] << 8) | rawData[5];
 }
 
+void MPU9250::readMagData(int16_t * destination){
+  chooseDevice(AK8963_ADDRESS);
+  /* x/y/z gyro register data, ST2 register stored here, must read ST2 at end of
+   * data acquisition */
+  uint8_t rawData[7];
+  /* Wait for magnetometer data ready bit to be set */
+  if(readByte(AK8963_ST1) & 0x01)
+  {
+    /* Read the six raw data and ST2 registers sequentially into data array */
+    readBytes(AK8963_XOUT_L, 7, &rawData[0]);
+    uint8_t c = rawData[6]; // End data read by reading ST2 register
+    /* Check if magnetic sensor overflow set, if not then report data */
+    if(!(c & 0x08)){
+      /* Turn the MSB and LSB into a signed 16-bit value */
+      destination[0] = ((int16_t)rawData[1] << 8) | rawData[0];
+      /* Data stored as little Endian */
+      destination[1] = ((int16_t)rawData[3] << 8) | rawData[2];
+      destination[2] = ((int16_t)rawData[5] << 8) | rawData[4];
+    }
+  }
+}
+
 void MPU9250::getAres() {
   /* Possible accelerometer scales (and their register bit settings) are:
    * 2 Gs (00), 4 Gs (01), 8 Gs (10), and 16 Gs  (11). */
@@ -545,6 +567,19 @@ void MPU9250::getGres() {
       break;
     case GFS_2000DPS:
       gRes = 2000.0/32768.0;
+      break;
+  }
+}
+
+void MPU9250::getMres() {
+  /* Possible magnetometer scales (and their register bit settings) are:
+   * 14 bit resolution (0) and 16 bit resolution (1) */
+  switch (Mscale){
+    case MFS_14BITS:
+      mRes = 10.*4912./8190.; // Proper scale to return milliGauss
+      break;
+    case MFS_16BITS:
+      mRes = 10.*4912./32760.0; // Proper scale to return milliGauss
       break;
   }
 }

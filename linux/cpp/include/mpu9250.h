@@ -220,6 +220,7 @@ class MPU9250
     /* Stores the 16-bit signed sensor output */
     int16_t accelCount[3];  // Accelerometer
     int16_t gyroCount[3];   // Gyroscope
+    int16_t magCount[3];    // Magnetometer
     // Scale resolutions per LSB for the sensors
     float aRes, gRes, mRes;
     // Variables to hold latest sensor data values
@@ -240,8 +241,10 @@ class MPU9250
     void initAK8963(float *);
     void readAccelData(int16_t * destination);
     void readGyroData(int16_t * destination);
+    void readMagData(int16_t * destination);
     void getAres();
     void getGres();
+    void getMres();
 };  // class MPU9250
 
 #endif // _MPU9250_H_
