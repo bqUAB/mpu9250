@@ -110,37 +110,30 @@ int main(){
   // Set initial input parameters
   printf("Setting initial input parameters...\n");
   MPU9250_STRUCT_INI(&myIMU);
-  printf("myIMU.Gscale = %d\n", myIMU.Gscale);
-  printf("myIMU.Ascale = %d\n", myIMU.Ascale);
-
-  for(int i = 0; i < 3; i++){
-    printf("myIMU.gyroBias[%d] = %.1f\n", i, myIMU.gyroBias[i]);
-    printf("myIMU.accelBias[%d] = %.1f\n", i, myIMU.accelBias[i]);
-  }
-  printf("\n");
 
   /* ----------> Start performing self test and reporting values <----------- */
+  printf("Starting self test...\n");
   MPU9250_SELF_TEST(file, myIMU.SelfTest);
 
   // Accelerometer values
   printf("x-axis self test: acceleration trim within : ");
   printf("%.0f%% of factory value\n", myIMU.SelfTest[0]);
-
   printf("y-axis self test: acceleration trim within : ");
   printf("%.0f%% of factory value\n", myIMU.SelfTest[1]);
-
   printf("z-axis self test: acceleration trim within : ");
   printf("%.0f%% of factory value\n", myIMU.SelfTest[2]);
 
   // Gyroscope values
   printf("x-axis self test: gyration trim within : ");
   printf("%.0f%% of factory value\n", myIMU.SelfTest[3]);
-
   printf("y-axis self test: gyration trim within : ");
   printf("%.0f%% of factory value\n", myIMU.SelfTest[4]);
-
   printf("z-axis self test: gyration trim within : ");
   printf("%.0f%% of factory value\n", myIMU.SelfTest[5]);
 
+  /* --> Calibrate gyro and accelerometer, load biases in bias registers <--- */
+  printf("Calibrating gyro and accelerometer...\n");
+  printf("Loading biases in bias registers...\n");
+  MPU9250_CALIBRATE(file, myIMU.gyroBias, myIMU.accelBias);
   return 0;
 }

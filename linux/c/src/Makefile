@@ -1,6 +1,6 @@
 ################################################################################
 # Makefile for ARM Linux                                                       #
-# Tested on EDS SoC 16.1 on Windows 7 64-Bit                                   #
+# Tested on SoC EDS 16.1 on Windows 7 64-Bit                                   #
 #                                                                              #
 # Copyright (C) 2015 by Joel Bodenmann <joel@embedded.pro>                     #
 # Modified 10 November 2017 by Byron Quezada <github.com/bqUAB>                #

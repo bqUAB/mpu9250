@@ -26,11 +26,20 @@
 #define ACCEL_CONFIG   0x1C
 #define ACCEL_CONFIG2  0x1D
 
+#define FIFO_EN       0x23
+#define I2C_MST_CTRL  0x24
+
+#define INT_ENABLE  0x38
+
 #define ACCEL_XOUT_H  0x3B
 
 #define GYRO_XOUT_H  0x43
 
 #define WHO_AM_I_MPU9250  0x75 // Should return 0x71
+
+#define USER_CTRL   0x6A  // Bit 7 enable DMP, bit 3 reset DMP
+#define PWR_MGMT_1  0x6B // Device defaults to the SLEEP mode
+#define PWR_MGMT_2  0x6C
 
 // Using the Sparkfun MPU-9250 breakout board, ADO is set to 0
 // Seven-bit device address is 110100 for ADO = 0 and 110101 for ADO = 1
@@ -43,7 +52,7 @@
 #endif // AD0
 
 typedef struct _MPU9250 {  // struct is a data type so you cannot set initial
-                          // input parameters. Remember to declare them.
+                           // input parameters. Remember to declare them.
   // Specify sensor full scale
   uint8_t Gscale, Ascale;
 
@@ -62,7 +71,8 @@ typedef struct _MPU9250 {  // struct is a data type so you cannot set initial
 
 } MPU9250;
 
-bool MPU9250_STRUCT_INI(struct _MPU9250 * myIMU);
+void MPU9250_STRUCT_INI(struct _MPU9250 * myIMU);
 void MPU9250_SELF_TEST(int file, float * destination);
+void MPU9250_CALIBRATE(int file, float * gyroBias, float * accelBias);
 
 #endif // _MPU9250_H_
