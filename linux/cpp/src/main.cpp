@@ -28,6 +28,8 @@ int main(){
 
   if (c == 0x71){  // WHO_AM_I should always be 0x71
     printf("MPU9250 is online...\n");
+    printf("Initializing MPU9250...\n");
+    myIMU.initMPU9250();
 
     // Start by performing self test and reporting values
     // myIMU.MPU9250SelfTest(myIMU.SelfTest);

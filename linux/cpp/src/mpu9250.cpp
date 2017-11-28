@@ -25,24 +25,6 @@ void MPU9250::chooseDevice(uint8_t devAdd){
   }
 }
 
-uint8_t MPU9250::comTest(uint8_t WHO_AM_I){
-  // Read the WHO_AM_I register, this is a good test of communication
-  uint8_t c;
-
-  if (WHO_AM_I == WHO_AM_I_AK8963){
-    chooseDevice(AK8963_ADDRESS);
-    printf("AK8963 should be: 0x48\t");
-    c = readByte(WHO_AM_I_AK8963);
-  } else {
-    chooseDevice(MPU9250_ADDRESS);
-    printf("MPU9250 should be: 0x71\t");
-    c = readByte(WHO_AM_I_MPU9250);
-  }
-
-  printf("WHO_AM_I: %#X\n", c);
-  return c;
-}
-
 // Linux I2C read and write protocols
 void MPU9250::writeByte(uint8_t regAdd, uint8_t data){
 
@@ -90,6 +72,31 @@ void MPU9250::readBytes(uint8_t regAdd, uint8_t count,
   }
 }
 
-void MPU9250SelfTest(float * destination){
+uint8_t MPU9250::comTest(uint8_t WHO_AM_I){
+  // Read the WHO_AM_I register, this is a good test of communication
+  uint8_t c;
+
+  if (WHO_AM_I == WHO_AM_I_AK8963){
+    chooseDevice(AK8963_ADDRESS);
+    printf("AK8963 should be: 0x48\t");
+    c = readByte(WHO_AM_I_AK8963);
+  } else {
+    chooseDevice(MPU9250_ADDRESS);
+    printf("MPU9250 should be: 0x71\t");
+    c = readByte(WHO_AM_I_MPU9250);
+  }
+
+  printf("WHO_AM_I: %#X\n", c);
+  return c;
+}
+
+void MPU9250::initMPU9250(){
+  chooseDevice(MPU9250_ADDRESS);
+
+  // Wake up device
+  writeByte(PWR_MGMT_1, 0x00);  // Clear sleep mode bit (6), enable all sensors
+  usleep(100*1000);             // Wait for all registers to reset
+
+  // get stable time source
 
 }

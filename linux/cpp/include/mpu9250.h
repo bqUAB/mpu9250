@@ -190,11 +190,11 @@ class MPU9250
 
   public:
     void openI2C();
-    uint8_t comTest(uint8_t WHO_AM_I);
     void writeByte(uint8_t regAdd, uint8_t data);
     uint8_t readByte(uint8_t regAdd);
     void readBytes(uint8_t regAdd, uint8_t count, uint8_t * data);
-    void MPU9250SelfTest(float * destination);
+    uint8_t comTest(uint8_t WHO_AM_I);
+    void initMPU9250();
 };  // class MPU9250
 
 #endif // _MPU9250_H_
