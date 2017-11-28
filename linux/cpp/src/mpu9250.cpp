@@ -93,10 +93,43 @@ uint8_t MPU9250::comTest(uint8_t WHO_AM_I){
 void MPU9250::initMPU9250(){
   chooseDevice(MPU9250_ADDRESS);
 
-  // Wake up device
+  /* Wake up device */
   writeByte(PWR_MGMT_1, 0x00);  // Clear sleep mode bit (6), enable all sensors
   usleep(100*1000);             // Wait for all registers to reset
 
-  // get stable time source
+  /* get stable time source */
+  // Auto selects the best available clock source – PLL if ready, else
+  // use the Internal oscillator
+  writeByte(PWR_MGMT_1, 0x01);
+  usleep(200*1000);
+
+  /* Configure Gyro and Thermometer */
+  // Disable FSYNC and set thermometer and gyro bandwith to 41 and 42 Hz
+  // rerspectively; minimum delay time for this setting is 5.9 ms, which means
+  // sensor fusion update rates cannot be higher than 1 / 0.0059 = 170 Hz
+  // DLPF_CFG = bits 2:0 = 011; this limits the sample rate to 1000 Hz for both
+  // With the MPU9250, it is possible to get gyro sample rates of 32 kHz (!),
+  // 8 kHz, or 1 kHz
+  writeByte(CONFIG, 0x03);
+
+  /* Set sample rate = gyroscope output rate/(1 + SMPLRT_DIV) */
+  // Use a 200 Hz rate; a rate consistent with the filter update rate determined
+  // in config above
+  writeByte(SMPLRT_DIV, 0x04);
+
+  /* Set gyroscope full scale range */
+  // Range selects FS_SEL and AFS_SEL are 0 - 3, so 2-bit values are
+  // left-shifted into positions 4:3
+  uint8_t c = readByte(GYRO_CONFIG);  // get current GYRO_CONFIG register value
+  // c = c & ~0xE0;  // Clear self-test bits [7:5]
+  c = c & ~0x02;  // Clear Fchoice bits [1:0]
+  c = c & ~0x18;  // Clear AFS bits [4:3]
+  c = c | Gscale << 3;  // Set full scale range for the gyro
+  // c =| 0x00;  // Set Fchoice for the gyro to 11 by writing its inverse to
+                 //bits 1:0 of GYRO_CONFIG
+  writeByte(GYRO_CONFIG, c);  // Write new ACCEL_CONFIG2 register value
+  // The accelerometer, gyro, and thermometer are set to 1 kHz sample rates,
+  // but all these rates are further reduced by a factor of 5 to 200 Hz because
+  // of the SMPLRT_DIV setting
 
 }

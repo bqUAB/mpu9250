@@ -183,6 +183,17 @@ class MPU9250
   protected:
     int file;
 
+    // Set initial input parameters
+    enum Gscale {
+      GFS_250DPS = 0,
+      GFS_500DPS,
+      GFS_1000DPS,
+      GFS_2000DPS
+    };
+
+    // Specify sensor full scale
+    uint8_t Gscale = GFS_250DPS;
+
   public:
 
   private:
