@@ -204,6 +204,8 @@ class MPU9250
 
   public:
     float SelfTest[6];
+    // Bias corrections for gyro and accelerometer
+    float gyroBias[3] = {0, 0, 0}, accelBias[3] = {0, 0, 0};
 
   private:
     void chooseDevice(uint8_t devAdd);
@@ -214,8 +216,9 @@ class MPU9250
     uint8_t readByte(uint8_t regAdd);
     void readBytes(uint8_t regAdd, uint8_t count, uint8_t * data);
     uint8_t comTest(uint8_t WHO_AM_I);
-    void initMPU9250();
     void MPU9250SelfTest(float * destination);
+    void calibrateMPU9250(float * gyroBias, float * accelBias);
+    void initMPU9250();
 };  // class MPU9250
 
 #endif // _MPU9250_H_
