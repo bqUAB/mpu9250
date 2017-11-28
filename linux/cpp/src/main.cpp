@@ -101,5 +101,14 @@ void loop(){ while(1){  // Arduino loop like
     myIMU.ax = (float)myIMU.accelCount[0]*myIMU.aRes;  // - accelBias[0];
     myIMU.ay = (float)myIMU.accelCount[1]*myIMU.aRes;  // - accelBias[1];
     myIMU.az = (float)myIMU.accelCount[2]*myIMU.aRes;  // - accelBias[2];
+
+    myIMU.readGyroData(myIMU.gyroCount);  // Read the x/y/z adc values
+    myIMU.getGres();
+
+    /* Calculate the gyro value into actual degrees per second
+     * This depends on scale being set */
+    myIMU.gx = (float)myIMU.gyroCount[0]*myIMU.gRes;
+    myIMU.gy = (float)myIMU.gyroCount[1]*myIMU.gRes;
+    myIMU.gz = (float)myIMU.gyroCount[2]*myIMU.gRes;
   }
 }}

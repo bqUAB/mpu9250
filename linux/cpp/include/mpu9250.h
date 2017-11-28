@@ -217,8 +217,9 @@ class MPU9250
     float gyroBias[3] = {0, 0, 0}, accelBias[3] = {0, 0, 0};
     /* Factory magnetometer calibration and magnetometer bias */
     float magCalibration[3] = {0, 0, 0}, magbias[3] = {0, 0, 0};
-    /* Stores the 16-bit signed accelerometer sensor output */
-    int16_t accelCount[3];
+    /* Stores the 16-bit signed sensor output */
+    int16_t accelCount[3];  // Accelerometer
+    int16_t gyroCount[3];   // Gyroscope
     // Scale resolutions per LSB for the sensors
     float aRes, gRes, mRes;
     // Variables to hold latest sensor data values
@@ -238,7 +239,9 @@ class MPU9250
     void initMPU9250();
     void initAK8963(float *);
     void readAccelData(int16_t * destination);
+    void readGyroData(int16_t * destination);
     void getAres();
+    void getGres();
 };  // class MPU9250
 
 #endif // _MPU9250_H_

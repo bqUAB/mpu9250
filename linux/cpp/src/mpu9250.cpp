@@ -496,6 +496,17 @@ void MPU9250::readAccelData(int16_t * destination){
   destination[2] = ((int16_t)rawData[4] << 8) | rawData[5];
 }
 
+void MPU9250::readGyroData(int16_t * destination){
+  chooseDevice(MPU9250_ADDRESS);
+  uint8_t rawData[6];  // x/y/z gyro register data stored here
+  /* Read the six raw data registers sequentially into data array */
+  readBytes(GYRO_XOUT_H, 6, &rawData[0]);
+  /* Turn the MSB and LSB into a signed 16-bit value */
+  destination[0] = ((int16_t)rawData[0] << 8) | rawData[1];
+  destination[1] = ((int16_t)rawData[2] << 8) | rawData[3];
+  destination[2] = ((int16_t)rawData[4] << 8) | rawData[5];
+}
+
 void MPU9250::getAres() {
   /* Possible accelerometer scales (and their register bit settings) are:
    * 2 Gs (00), 4 Gs (01), 8 Gs (10), and 16 Gs  (11). */
@@ -513,6 +524,27 @@ void MPU9250::getAres() {
       break;
     case AFS_16G:
       aRes = 16.0/32768.0;
+      break;
+  }
+}
+
+void MPU9250::getGres() {
+  /* Possible gyro scales (and their register bit settings) are:
+   * 250 DPS (00), 500 DPS (01), 1000 DPS (10), and 2000 DPS  (11). */
+  switch (Gscale){
+    /* Here's a bit of an algorith to calculate DPS/(ADC tick) based on
+     *that 2-bit value: */
+    case GFS_250DPS:
+      gRes = 250.0/32768.0;
+      break;
+    case GFS_500DPS:
+      gRes = 500.0/32768.0;
+      break;
+    case GFS_1000DPS:
+      gRes = 1000.0/32768.0;
+      break;
+    case GFS_2000DPS:
+      gRes = 2000.0/32768.0;
       break;
   }
 }
