@@ -226,6 +226,9 @@ class MPU9250
     // Variables to hold latest sensor data values
     float ax, ay, az, gx, gy, gz, mx, my, mz;
 
+    int16_t tempCount;  // Temperature raw count output
+    float temperature;  // Stores the real internal chip temperature in Celsius
+
   private:
     void chooseDevice(uint8_t devAdd);
 
@@ -245,6 +248,7 @@ class MPU9250
     void getAres();
     void getGres();
     void getMres();
+    int16_t readTempData();
 };  // class MPU9250
 
 #endif // _MPU9250_H_
