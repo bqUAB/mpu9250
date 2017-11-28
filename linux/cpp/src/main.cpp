@@ -24,11 +24,12 @@ int main(){
   printf("===== MPU 9250 Demo using Linux =====\n");
   myIMU.openI2C();
   // Initiating communication
-  myIMU.comTest(WHO_AM_I_MPU9250);
+  uint8_t c = myIMU.comTest(WHO_AM_I_MPU9250);
 
-/*
   if (c == 0x71){  // WHO_AM_I should always be 0x71
     printf("MPU9250 is online...\n");
+    printf("Initializing MPU9250...\n");
+    myIMU.initMPU9250();
 
     // Start by performing self test and reporting values
     // myIMU.MPU9250SelfTest(myIMU.SelfTest);
@@ -47,6 +48,6 @@ int main(){
     // printf("z-axis self test: gyration trim within : ");
     // printf("% 0.2f%% of factory value\n", myIMU.SelfTest[5]);
   }
-*/
+
   return 0;
 }

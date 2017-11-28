@@ -183,6 +183,25 @@ class MPU9250
   protected:
     int file;
 
+    // Set initial input parameters
+    enum Gscale {
+      GFS_250DPS = 0,
+      GFS_500DPS,
+      GFS_1000DPS,
+      GFS_2000DPS
+    };
+
+    enum Ascale {
+      AFS_2G = 0,
+      AFS_4G,
+      AFS_8G,
+      AFS_16G
+    };
+
+    // Specify sensor full scale
+    uint8_t Gscale = GFS_250DPS;
+    uint8_t Ascale = AFS_2G;
+
   public:
 
   private:
@@ -190,11 +209,11 @@ class MPU9250
 
   public:
     void openI2C();
-    void comTest(uint8_t WHO_AM_I);
     void writeByte(uint8_t regAdd, uint8_t data);
     uint8_t readByte(uint8_t regAdd);
     void readBytes(uint8_t regAdd, uint8_t count, uint8_t * data);
-    void MPU9250SelfTest(float * destination);
+    uint8_t comTest(uint8_t WHO_AM_I);
+    void initMPU9250();
 };  // class MPU9250
 
 #endif // _MPU9250_H_
