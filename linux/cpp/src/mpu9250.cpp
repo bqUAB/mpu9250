@@ -583,3 +583,12 @@ void MPU9250::getMres() {
       break;
   }
 }
+
+int16_t MPU9250::readTempData() {
+  chooseDevice(MPU9250_ADDRESS);
+  uint8_t rawData[2];  // x/y/z gyro register data stored here
+  /* Read the two raw data registers sequentially into data array */
+  readBytes(TEMP_OUT_H, 2, &rawData[0]);
+  /* Turn the MSB and LSB into a 16-bit value */
+  return ((int16_t)rawData[0] << 8) | rawData[1];
+}

@@ -21,11 +21,19 @@
 
 MPU9250 myIMU;
 
+void setup();
 void loop();
 
 int main(){
 
   printf("===== MPU 9250 Demo using Linux =====\n");
+  setup();
+  loop();
+
+  return 0;
+}
+
+void setup() {  // Arduino setup like
   myIMU.openI2C();
   /* Initiating communication */
   uint8_t c = myIMU.comTest(WHO_AM_I_MPU9250);
@@ -83,13 +91,9 @@ int main(){
     perror("Could not connect to MPU9250");
     exit(1);
   }
-
-  loop();
-
-  return 0;
 }
 
-void loop(){ while(1){  // Arduino loop like
+void loop() { while(1){  // Arduino loop like
   /* If intPin goes high, all data registers have new data
    * On interrupt, check if data ready interrupt */
   if (myIMU.readByte(INT_STATUS) & 0x01){
@@ -131,6 +135,8 @@ void loop(){ while(1){  // Arduino loop like
               myIMU.magbias[1];
     myIMU.mz = (float)myIMU.magCount[2]*myIMU.mRes*myIMU.magCalibration[2] -
               myIMU.magbias[2];
+
+    myIMU.tempCount = myIMU.readTempData();  // Read the adc values
   }
 
   /* Print acceleration values in milligs! */
@@ -148,6 +154,11 @@ void loop(){ while(1){  // Arduino loop like
   printf("Y-mag field: % 0.2f mG\n", myIMU.my);
   printf("Z-mag field: % 0.2f mG\n", myIMU.mz);
 
-  usleep(0.5*1000000);
+  // Temperature in degrees Centigrade
+  myIMU.temperature = ((float) myIMU.tempCount) / 333.87 + 21.0;
+  // Print temperature in degrees Centigrade
+  printf("Temperature is % 0.2f degrees C\n", myIMU.temperature);
+
+  usleep(0.2*1000000);
 
 }}
