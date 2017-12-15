@@ -6,11 +6,10 @@
 
 #include <stdint.h>         // Needed for unit uint8_t data type
 #include <stdio.h>          // Needed for printf, snprintf, perror
-#include <fcntl.h>          // Needed for open()
 #include <stdlib.h>         // Needed for exit()
-#include <unistd.h>         // Needed for write, usleep
 #include <sys/ioctl.h>      // Needed for ioctl
 #include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
+#include <unistd.h>         // Needed for write, usleep
 #include <math.h>           // Needed for pow
 
 /* See also MPU-9250 Register Map and Descriptions, Revision 6.0,
@@ -181,8 +180,6 @@
 class MPU9250
 {
   protected:
-    int file;
-
     /* Set initial input parameters */
     enum Gscale {
       GFS_250DPS = 0,
@@ -212,6 +209,8 @@ class MPU9250
     uint8_t Mmode = 0x02;
 
   public:
+    int* ptrFile;
+
     float SelfTest[6];
     /* Bias corrections for gyro and accelerometer */
     float gyroBias[3] = {0, 0, 0}, accelBias[3] = {0, 0, 0};
@@ -230,21 +229,20 @@ class MPU9250
     float temperature;  // Stores the real internal chip temperature in Celsius
 
   private:
-    void chooseDevice(uint8_t devAdd);
+  void chooseDevice(uint8_t devAdd);
 
   public:
-    void openI2C();
     void writeByte(uint8_t regAdd, uint8_t data);
     uint8_t readByte(uint8_t regAdd);
-    void readBytes(uint8_t regAdd, uint8_t count, uint8_t * data);
+    void readBytes(uint8_t regAdd, uint8_t count, uint8_t* data);
     uint8_t comTest(uint8_t WHO_AM_I);
-    void MPU9250SelfTest(float * destination);
-    void calibrateMPU9250(float * gyroBias, float * accelBias);
+    void MPU9250SelfTest(float* destination);
+    void calibrateMPU9250(float* gyroBias, float* accelBias);
     void initMPU9250();
-    void initAK8963(float *);
-    void readAccelData(int16_t * destination);
-    void readGyroData(int16_t * destination);
-    void readMagData(int16_t * destination);
+    void initAK8963(float* destination);
+    void readAccelData(int16_t* destination);
+    void readGyroData(int16_t* destination);
+    void readMagData(int16_t* destination);
     void getAres();
     void getGres();
     void getMres();

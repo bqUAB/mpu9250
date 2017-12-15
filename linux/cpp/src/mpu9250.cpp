@@ -5,25 +5,9 @@
  *====== and temperature data
  *============================================================================*/
 
-void MPU9250::openI2C(){
-  /* ------------------------> Open the I2C adapter <------------------------ */
-  uint8_t adapterN = 1;  // For Raspberry Pi 2
-  char filename[11];     // To hold /dev/i2c-#
-
-  /* Access an I2C adapter from a C++ program */
-  snprintf(filename, sizeof(filename), "/dev/i2c-%d", adapterN);
-
-  /* Open I2C bus driver */
-  if ((file = open(filename, O_RDWR)) < 0) {
-    /* ERROR HANDLING: you can check errno to see what went wrong */
-    perror("Failed to open the I2C bus.\n");
-    exit(1);
-  }
-}
-
 void MPU9250::chooseDevice(uint8_t devAdd){
   /* ---------------> Specify device address to communicate <---------------- */
-  if (ioctl(file, I2C_SLAVE, devAdd) < 0){
+  if (ioctl(*ptrFile, I2C_SLAVE, devAdd) < 0){
     printf("Failed to acquire bus access and/or talk to slave.\n");
     /* ERROR HANDLING; you can check errno to see what went wrong */
     exit(1);
@@ -39,7 +23,7 @@ void MPU9250::writeByte(uint8_t regAdd, uint8_t data){
   /* Write to define register */
   wBuf[0] = regAdd;
   wBuf[1] = data;
-  if (write(file, &wBuf, sizeof(wBuf)) == sizeof(wBuf)){
+  if (write(*ptrFile, &wBuf, sizeof(wBuf)) == sizeof(wBuf)){
     //bSuccess = 1;
   } else {
     /* ERROR HANDLING: i2c transaction failed */
@@ -53,10 +37,10 @@ uint8_t MPU9250::readByte(uint8_t regAdd){
   uint8_t data; // `data` will store the register data
 
   /* write to define register */
-  if (write(file, &regAdd, sizeof(regAdd)) == sizeof(regAdd)){
+  if (write(*ptrFile, &regAdd, sizeof(regAdd)) == sizeof(regAdd)){
 
     /* read back value */
-    if (read(file, &data, sizeof(data)) == sizeof(data)){
+    if (read(*ptrFile, &data, sizeof(data)) == sizeof(data)){
       //bSuccess = 1;
     }
   }
@@ -65,13 +49,13 @@ uint8_t MPU9250::readByte(uint8_t regAdd){
 }
 
 void MPU9250::readBytes(uint8_t regAdd, uint8_t count,
-                        uint8_t * data){
+                        uint8_t* data){
 
   //uint8_t bSuccess = 0;
   /* write to define register */
-  if (write(file, &regAdd, sizeof(regAdd)) == sizeof(regAdd)){
+  if (write(*ptrFile, &regAdd, sizeof(regAdd)) == sizeof(regAdd)){
     // read back value
-    if (read(file, data, count) == count){
+    if (read(*ptrFile, data, count) == count){
       //bSuccess = 1;
     }
   }
@@ -98,7 +82,7 @@ uint8_t MPU9250::comTest(uint8_t WHO_AM_I){
 /* Accelerometer and gyroscope self test; check calibration wrt factory
  * settings. Should return percent deviation from factory trim values, +/- 14 or
  * less deviation is a pass */
-void MPU9250::MPU9250SelfTest(float * destination){
+void MPU9250::MPU9250SelfTest(float* destination){
   chooseDevice(MPU9250_ADDRESS);
   uint8_t rawData[6] = {0, 0, 0, 0, 0, 0};
   uint8_t selfTest[6];
@@ -213,7 +197,7 @@ void MPU9250::MPU9250SelfTest(float * destination){
 /* Function which accumulates gyro and accelerometer data after device
  * initialization. It calculates the average of the at-rest readings and then
  * loads the resulting offsets into accelerometer and gyro bias registers */
-void MPU9250::calibrateMPU9250(float * gyroBias, float * accelBias){
+void MPU9250::calibrateMPU9250(float* gyroBias, float* accelBias){
   chooseDevice(MPU9250_ADDRESS);
   uint8_t data[12]; // data array to hold accelerometer and gyro x, y, z, data
   uint16_t i, packet_count, fifo_count;
@@ -459,7 +443,7 @@ void MPU9250::initMPU9250(){
 
 }
 
-void MPU9250::initAK8963(float * destination){
+void MPU9250::initAK8963(float* destination){
   chooseDevice(AK8963_ADDRESS);
   /* First extract the factory calibration for each magnetometer axis */
   uint8_t rawData[3];  // x/y/z gyro calibration data stored here
@@ -485,7 +469,7 @@ void MPU9250::initAK8963(float * destination){
   usleep(10*1000);
 }
 
-void MPU9250::readAccelData(int16_t * destination){
+void MPU9250::readAccelData(int16_t* destination){
   chooseDevice(MPU9250_ADDRESS);
   uint8_t rawData[6];  // x/y/z accel register data stored here
   /* Read the six raw data registers into data array */
@@ -496,7 +480,7 @@ void MPU9250::readAccelData(int16_t * destination){
   destination[2] = ((int16_t)rawData[4] << 8) | rawData[5];
 }
 
-void MPU9250::readGyroData(int16_t * destination){
+void MPU9250::readGyroData(int16_t* destination){
   chooseDevice(MPU9250_ADDRESS);
   uint8_t rawData[6];  // x/y/z gyro register data stored here
   /* Read the six raw data registers sequentially into data array */
@@ -507,7 +491,7 @@ void MPU9250::readGyroData(int16_t * destination){
   destination[2] = ((int16_t)rawData[4] << 8) | rawData[5];
 }
 
-void MPU9250::readMagData(int16_t * destination){
+void MPU9250::readMagData(int16_t* destination){
   chooseDevice(AK8963_ADDRESS);
   /* x/y/z gyro register data, ST2 register stored here, must read ST2 at end of
    * data acquisition */
