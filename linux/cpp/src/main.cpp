@@ -23,8 +23,8 @@
 #include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
 #include <mpu9250.h>
 
-void openI2C(int file, uint8_t adapterN);
-void chooseDevice(int file, uint8_t devAdd);
+void openI2C(int* ptrFile, uint8_t adapterN);
+void chooseDevice(int* ptrFile, uint8_t devAdd);
 
 MPU9250 myIMU;
 
@@ -33,28 +33,18 @@ int main(){
   int file = 0;
 
   printf("===== MPU 9250 Demo using Linux =====\n");
-  //openI2C(file, 1);
-  char filename[11]; // To hold /dev/i2c-#
-
-  /* Access an I2C adapter from a C++ program */
-  snprintf(filename, sizeof(filename), "/dev/i2c-%d", 1);
-
-  /* Open I2C bus driver */
-  if ((file = open(filename, O_RDWR)) < 0) {
-    /* ERROR HANDLING: you can check errno to see what went wrong */
-    perror("Failed to open the I2C bus.\n");
-    exit(1);
-  }
+  openI2C(&file, 1);
   myIMU.ptrFile = &file;
-  chooseDevice(file, 0x68);
-  printf("MPU9250 should be: 0x71\t");
-  uint8_t c = myIMU.readByte(WHO_AM_I_MPU9250);
-  printf("WHO_AM_I: %#X\n", c);
+  uint8_t c = myIMU.comTest(WHO_AM_I_MPU9250);
+
+  if (c == 0x71){  // WHO_AM_I should always be 0x71
+    printf("MPU9250 is online...\n");
+  }
 
   return 0;
 }
 
-void openI2C(int file, uint8_t adapterN){
+void openI2C(int* ptrFile, uint8_t adapterN){
   /* ------------------------> Open the I2C adapter <------------------------ */
   char filename[11]; // To hold /dev/i2c-#
 
@@ -62,16 +52,16 @@ void openI2C(int file, uint8_t adapterN){
   snprintf(filename, sizeof(filename), "/dev/i2c-%d", adapterN);
 
   /* Open I2C bus driver */
-  if ((file = open(filename, O_RDWR)) < 0) {
+  if ((*ptrFile = open(filename, O_RDWR)) < 0) {
     /* ERROR HANDLING: you can check errno to see what went wrong */
     perror("Failed to open the I2C bus.\n");
     exit(1);
   }
 }
 
-void chooseDevice(int file, uint8_t devAdd){
+void chooseDevice(int* ptrFile, uint8_t devAdd){
   /* ---------------> Specify device address to communicate <---------------- */
-  if (ioctl(file, I2C_SLAVE, devAdd) < 0){
+  if (ioctl(*ptrFile, I2C_SLAVE, devAdd) < 0){
     printf("Failed to acquire bus access and/or talk to slave.\n");
     /* ERROR HANDLING; you can check errno to see what went wrong */
     exit(1);

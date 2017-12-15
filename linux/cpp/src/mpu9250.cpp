@@ -5,6 +5,15 @@
  *====== and temperature data
  *============================================================================*/
 
+void MPU9250::chooseDevice(uint8_t devAdd){
+  /* ---------------> Specify device address to communicate <---------------- */
+  if (ioctl(*ptrFile, I2C_SLAVE, devAdd) < 0){
+    printf("Failed to acquire bus access and/or talk to slave.\n");
+    /* ERROR HANDLING; you can check errno to see what went wrong */
+    exit(1);
+  }
+}
+
 /* Linux I2C read and write protocols */
 void MPU9250::writeByte(uint8_t regAdd, uint8_t data){
 
@@ -57,11 +66,11 @@ uint8_t MPU9250::comTest(uint8_t WHO_AM_I){
   uint8_t c;
 
   if (WHO_AM_I == WHO_AM_I_AK8963){
-    //chooseDevice(AK8963_ADDRESS);
+    chooseDevice(AK8963_ADDRESS);
     printf("AK8963 should be: 0x48\t");
     c = readByte(WHO_AM_I_AK8963);
   } else {
-    //chooseDevice(MPU9250_ADDRESS);
+    chooseDevice(MPU9250_ADDRESS);
     printf("MPU9250 should be: 0x71\t");
     c = readByte(WHO_AM_I_MPU9250);
   }
@@ -74,7 +83,7 @@ uint8_t MPU9250::comTest(uint8_t WHO_AM_I){
  * settings. Should return percent deviation from factory trim values, +/- 14 or
  * less deviation is a pass */
 void MPU9250::MPU9250SelfTest(float * destination){
-  //chooseDevice(MPU9250_ADDRESS);
+  chooseDevice(MPU9250_ADDRESS);
   uint8_t rawData[6] = {0, 0, 0, 0, 0, 0};
   uint8_t selfTest[6];
   int16_t gAvg[3], gSTAvg[3], aAvg[3], aSTAvg[3];
@@ -189,7 +198,7 @@ void MPU9250::MPU9250SelfTest(float * destination){
  * initialization. It calculates the average of the at-rest readings and then
  * loads the resulting offsets into accelerometer and gyro bias registers */
 void MPU9250::calibrateMPU9250(float * gyroBias, float * accelBias){
-  //chooseDevice(MPU9250_ADDRESS);
+  chooseDevice(MPU9250_ADDRESS);
   uint8_t data[12]; // data array to hold accelerometer and gyro x, y, z, data
   uint16_t i, packet_count, fifo_count;
   int32_t gyro_bias[3]  = {0, 0, 0}, accel_bias[3] = {0, 0, 0};
@@ -366,7 +375,7 @@ void MPU9250::calibrateMPU9250(float * gyroBias, float * accelBias){
 }
 
 void MPU9250::initMPU9250(){
-  //chooseDevice(MPU9250_ADDRESS);
+  chooseDevice(MPU9250_ADDRESS);
 
   /* Wake up device */
   writeByte(PWR_MGMT_1, 0x00);  // Clear sleep mode bit (6), enable all sensors
@@ -435,7 +444,7 @@ void MPU9250::initMPU9250(){
 }
 
 void MPU9250::initAK8963(float * destination){
-  //chooseDevice(AK8963_ADDRESS);
+  chooseDevice(AK8963_ADDRESS);
   /* First extract the factory calibration for each magnetometer axis */
   uint8_t rawData[3];  // x/y/z gyro calibration data stored here
   writeByte(AK8963_CNTL, 0x00); // Power down magnetometer
@@ -461,7 +470,7 @@ void MPU9250::initAK8963(float * destination){
 }
 
 void MPU9250::readAccelData(int16_t * destination){
-  //chooseDevice(MPU9250_ADDRESS);
+  chooseDevice(MPU9250_ADDRESS);
   uint8_t rawData[6];  // x/y/z accel register data stored here
   /* Read the six raw data registers into data array */
   readBytes(ACCEL_XOUT_H, 6, &rawData[0]);
@@ -472,7 +481,7 @@ void MPU9250::readAccelData(int16_t * destination){
 }
 
 void MPU9250::readGyroData(int16_t * destination){
-  //chooseDevice(MPU9250_ADDRESS);
+  chooseDevice(MPU9250_ADDRESS);
   uint8_t rawData[6];  // x/y/z gyro register data stored here
   /* Read the six raw data registers sequentially into data array */
   readBytes(GYRO_XOUT_H, 6, &rawData[0]);
@@ -483,7 +492,7 @@ void MPU9250::readGyroData(int16_t * destination){
 }
 
 void MPU9250::readMagData(int16_t * destination){
-  //chooseDevice(AK8963_ADDRESS);
+  chooseDevice(AK8963_ADDRESS);
   /* x/y/z gyro register data, ST2 register stored here, must read ST2 at end of
    * data acquisition */
   uint8_t rawData[7];
@@ -560,7 +569,7 @@ void MPU9250::getMres() {
 }
 
 int16_t MPU9250::readTempData() {
-  //chooseDevice(MPU9250_ADDRESS);
+  chooseDevice(MPU9250_ADDRESS);
   uint8_t rawData[2];  // x/y/z gyro register data stored here
   /* Read the two raw data registers sequentially into data array */
   readBytes(TEMP_OUT_H, 2, &rawData[0]);

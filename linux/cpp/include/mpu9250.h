@@ -6,6 +6,9 @@
 
 #include <stdint.h>         // Needed for unit uint8_t data type
 #include <stdio.h>          // Needed for printf, snprintf, perror
+#include <stdlib.h>         // Needed for exit()
+#include <sys/ioctl.h>      // Needed for ioctl
+#include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
 #include <unistd.h>         // Needed for write, usleep
 #include <math.h>           // Needed for pow
 
@@ -224,6 +227,9 @@ class MPU9250
 
     int16_t tempCount;  // Temperature raw count output
     float temperature;  // Stores the real internal chip temperature in Celsius
+
+  private:
+  void chooseDevice(uint8_t devAdd);
 
   public:
     void writeByte(uint8_t regAdd, uint8_t data);
