@@ -49,7 +49,7 @@ uint8_t MPU9250::readByte(uint8_t regAdd){
 }
 
 void MPU9250::readBytes(uint8_t regAdd, uint8_t count,
-                        uint8_t * data){
+                        uint8_t* data){
 
   //uint8_t bSuccess = 0;
   /* write to define register */
@@ -82,7 +82,7 @@ uint8_t MPU9250::comTest(uint8_t WHO_AM_I){
 /* Accelerometer and gyroscope self test; check calibration wrt factory
  * settings. Should return percent deviation from factory trim values, +/- 14 or
  * less deviation is a pass */
-void MPU9250::MPU9250SelfTest(float * destination){
+void MPU9250::MPU9250SelfTest(float* destination){
   chooseDevice(MPU9250_ADDRESS);
   uint8_t rawData[6] = {0, 0, 0, 0, 0, 0};
   uint8_t selfTest[6];
@@ -197,7 +197,7 @@ void MPU9250::MPU9250SelfTest(float * destination){
 /* Function which accumulates gyro and accelerometer data after device
  * initialization. It calculates the average of the at-rest readings and then
  * loads the resulting offsets into accelerometer and gyro bias registers */
-void MPU9250::calibrateMPU9250(float * gyroBias, float * accelBias){
+void MPU9250::calibrateMPU9250(float* gyroBias, float* accelBias){
   chooseDevice(MPU9250_ADDRESS);
   uint8_t data[12]; // data array to hold accelerometer and gyro x, y, z, data
   uint16_t i, packet_count, fifo_count;
@@ -443,7 +443,7 @@ void MPU9250::initMPU9250(){
 
 }
 
-void MPU9250::initAK8963(float * destination){
+void MPU9250::initAK8963(float* destination){
   chooseDevice(AK8963_ADDRESS);
   /* First extract the factory calibration for each magnetometer axis */
   uint8_t rawData[3];  // x/y/z gyro calibration data stored here
@@ -469,7 +469,7 @@ void MPU9250::initAK8963(float * destination){
   usleep(10*1000);
 }
 
-void MPU9250::readAccelData(int16_t * destination){
+void MPU9250::readAccelData(int16_t* destination){
   chooseDevice(MPU9250_ADDRESS);
   uint8_t rawData[6];  // x/y/z accel register data stored here
   /* Read the six raw data registers into data array */
@@ -480,7 +480,7 @@ void MPU9250::readAccelData(int16_t * destination){
   destination[2] = ((int16_t)rawData[4] << 8) | rawData[5];
 }
 
-void MPU9250::readGyroData(int16_t * destination){
+void MPU9250::readGyroData(int16_t* destination){
   chooseDevice(MPU9250_ADDRESS);
   uint8_t rawData[6];  // x/y/z gyro register data stored here
   /* Read the six raw data registers sequentially into data array */
@@ -491,7 +491,7 @@ void MPU9250::readGyroData(int16_t * destination){
   destination[2] = ((int16_t)rawData[4] << 8) | rawData[5];
 }
 
-void MPU9250::readMagData(int16_t * destination){
+void MPU9250::readMagData(int16_t* destination){
   chooseDevice(AK8963_ADDRESS);
   /* x/y/z gyro register data, ST2 register stored here, must read ST2 at end of
    * data acquisition */

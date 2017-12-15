@@ -234,15 +234,15 @@ class MPU9250
   public:
     void writeByte(uint8_t regAdd, uint8_t data);
     uint8_t readByte(uint8_t regAdd);
-    void readBytes(uint8_t regAdd, uint8_t count, uint8_t * data);
+    void readBytes(uint8_t regAdd, uint8_t count, uint8_t* data);
     uint8_t comTest(uint8_t WHO_AM_I);
-    void MPU9250SelfTest(float * destination);
-    void calibrateMPU9250(float * gyroBias, float * accelBias);
+    void MPU9250SelfTest(float* destination);
+    void calibrateMPU9250(float* gyroBias, float* accelBias);
     void initMPU9250();
-    void initAK8963(float *);
-    void readAccelData(int16_t * destination);
-    void readGyroData(int16_t * destination);
-    void readMagData(int16_t * destination);
+    void initAK8963(float* destination);
+    void readAccelData(int16_t* destination);
+    void readGyroData(int16_t* destination);
+    void readMagData(int16_t* destination);
     void getAres();
     void getGres();
     void getMres();
