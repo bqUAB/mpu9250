@@ -9,7 +9,7 @@
 ################################################################################
 
 # This is the name of the binaries that will be generated
-TARGET  = mpu_9250_demo
+TARGET  = mpu-9250-simple-demo
 
 # Here we add all *.cpp files that we want to compile
 CPPSRCS = main.cpp mpu9250.cpp
@@ -21,9 +21,9 @@ INCS    = ../include
 LIBS    = -lm
 
 # Parameters for SCP upload. Set up SSH keys to bypass password prompt
-SCP_TARGET_IP   = 192.168.0.12
-SCP_USER        = pi
-SCP_TARGET_PATH = /home/pi/bin
+SCP_TARGET_IP   = 192.168.0.11
+SCP_USER        = debian
+SCP_TARGET_PATH = /home/debian/bin
 SCP             = scp
 SCP_FLAGS       =
 

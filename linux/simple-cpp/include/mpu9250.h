@@ -15,6 +15,26 @@
  * RM-MPU-9250A-00, Rev. 1.6, 01/07/2015 for registers not listed in above
  * document. */
 
+ /* Using the MPU-9250 breakout board, ADO is set to 0
+  * Seven-bit device address is 110100 for ADO = 0 and 110101 for ADO = 1 */
+ #define ADO 0
+ #if ADO
+ #define MPU9250_ADDRESS 0x69  // Device address when ADO = 1
+ #else
+ #define MPU9250_ADDRESS 0x68  // Device address when ADO = 0
+ #endif // AD0
+                                // default value
+#define SMPLRT_DIV        0x19  // 0x00
+#define CONFIG            0x1A  // 0x00
+#define GYRO_CONFIG       0x1B  // 0x00
+#define ACCEL_CONFIG      0x1C  // 0x00
+#define ACCEL_CONFIG2     0x1D  // 0x00
+
+#define I2C_MST_CTRL       0x24  // 0x00
+
+#define INT_PIN_CFG        0x37  // 0x00
+#define INT_ENABLE         0x38  // 0x00
+
 #define INT_STATUS         0x3A
 #define ACCEL_XOUT_H       0x3B
 #define ACCEL_XOUT_L       0x3C
@@ -34,17 +54,17 @@
 #define WHO_AM_I_MPU9250   0x75 // Should return 0x71
 
 /* Magnetometer Registers */
-#define WHO_AM_I_AK8963  0x00 // should return 0x48
+#define AK8963_ADDRESS   0x0C
 
-/* Using the MPU-9250 breakout board, ADO is set to 0
- * Seven-bit device address is 110100 for ADO = 0 and 110101 for ADO = 1 */
-#define ADO 0
-#if ADO
-#define MPU9250_ADDRESS 0x69  // Device address when ADO = 1
-#else
-#define MPU9250_ADDRESS 0x68  // Device address when ADO = 0
-#define AK8963_ADDRESS  0x0C  // Address of magnetometer
-#endif // AD0
+#define WHO_AM_I_AK8963  0x00 // should return 0x48
+#define INFO             0x01
+#define AK8963_ST1       0x02  // data ready status bit 0
+#define AK8963_XOUT_L    0x03  // data
+#define AK8963_XOUT_H    0x04
+#define AK8963_YOUT_L    0x05
+#define AK8963_YOUT_H    0x06
+#define AK8963_ZOUT_L    0x07
+#define AK8963_ZOUT_H    0x08
 
 class MPU9250 {
   protected:
@@ -99,6 +119,7 @@ class MPU9250 {
     uint8_t readByte(uint8_t regAdd);
     void readBytes(uint8_t regAdd, uint8_t count, uint8_t* data);
     uint8_t comTest(uint8_t WHO_AM_I);
+    void initMPU9250();
     void readAccelData(int16_t* destination);
     void readGyroData(int16_t* destination);
     void readMagData(int16_t* destination);

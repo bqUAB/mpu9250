@@ -79,6 +79,57 @@ uint8_t MPU9250::comTest(uint8_t WHO_AM_I){
   return c;
 }
 
+void MPU9250::initMPU9250(){
+  chooseDevice(MPU9250_ADDRESS);
+
+  /* -------------------> Configure Gyro and Thermometer <------------------- */
+  /* Disable FSYNC and set thermometer and gyro bandwith to 41 and 42 Hz
+   * rerspectively; minimum delay time for this setting is 5.9 ms, which means
+   * sensor fusion update rates cannot be higher than 1 / 0.0059 = 170 Hz
+   * DLPF_CFG = bits 2:0 = 011; this limits the sample rate to 1000 Hz for both
+   * With the MPU9250, it is possible to get gyro sample rates of 32 kHz (!),
+   * 8 kHz, or 1 kHz */
+  writeByte(CONFIG, 0x03);
+
+  /* ------> Set sample rate = gyroscope output rate/(1 + SMPLRT_DIV) <------ */
+  /* Use a 200 Hz rate; a rate consistent with the filter update rate determined
+   * in config above */
+  writeByte(SMPLRT_DIV, 0x04);
+
+  /* -------------------> Set gyroscope full scale range <------------------- */
+  /* Range selects FS_SEL and AFS_SEL are 0 - 3, so 2-bit values are
+   * left-shifted into positions 4:3 */
+  uint8_t c = 0;
+  c = c | Gscale << 3;  // Set full scale range for the gyro
+  writeByte(GYRO_CONFIG, c);  // Write new GYRO_CONFIG value to register
+
+  /* Set accelerometer full-scale range configuration */
+  c = 0;
+  c = c & Ascale << 3;  // Set full scale range for the accelerometer
+  writeByte(ACCEL_CONFIG, c);  // Write new ACCEL_CONFIG register value
+
+  /* ------------> Set accelerometer sample rate configuration <------------- */
+  /* It is possible to get a 4 kHz sample rate from the accelerometer by
+   * choosing 1 for accel_fchoice_b bit [3]; in this case the bandwith is
+   * 1.13 kHz */
+  c = 0;
+  c = c | 0x03;  // Set accelerometer rate to 1 kHz and bandwith to 41 Hz
+  writeByte(ACCEL_CONFIG2, c);  // Write a new ACCEL_CONFIG2 register value
+  /* The accelerometer, gyro, and thermometer are set to 1 kHz sample rates,
+   * but all these rates are further reduced by a factor of 5 to 200 Hz because
+   * of the SMPLRT_DIV setting */
+
+  /* ---------------> Configure Interrupts and Bypass Enable <--------------- */
+  /* Set interrupt pin active high, push-pull, hold interrupt pin level HIGH
+   * until interrupt cleared, clear on read of INT_STATUS, and enable
+   * I2C_BYPASS_EN so additional chips can join the I2C bus and all can be
+   * controlled by Linux as master */
+  writeByte(INT_PIN_CFG, 0x22);  // Enable magnetometer
+  writeByte(INT_ENABLE, 0X01);  // Enable data ready (bit 0) interrupt
+  usleep(100*1000);
+
+}
+
 void MPU9250::readAccelData(int16_t* destination){
   chooseDevice(MPU9250_ADDRESS);
   uint8_t rawData[6];  // x/y/z accel register data stored here

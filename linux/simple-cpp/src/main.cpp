@@ -35,7 +35,7 @@ int main(){
   int file = 0;
 
   printf("===== MPU 9250 Demo using Linux =====\n");
-  openI2C(&file, 1);
+  openI2C(&file, 2);  // Beagle Bone Black
   myIMU.ptrFile = &file;
 
   setup();
@@ -75,6 +75,7 @@ void setup() {  // Arduino setup like
   if (c == 0x71){  // WHO_AM_I should always be 0x71
     printf("MPU9250 is online...\n");
 
+    myIMU.initMPU9250();
     myIMU.getGres();
     myIMU.getAres();
 
@@ -98,7 +99,7 @@ void loop() { while(1){  // Arduino loop like
   /* If intPin goes high, all data registers have new data
    * On interrupt, check if data ready interrupt */
   if (myIMU.readByte(INT_STATUS) & 0x01){
-    
+
     myIMU.readAccelData(myIMU.accelCount);  // Read the x/y/z adc values
     /* Now we'll calculate the acceleration value into actual g's
      * This depends on scale being set */
@@ -114,24 +115,10 @@ void loop() { while(1){  // Arduino loop like
     myIMU.gz = (float)myIMU.gyroCount[2]*myIMU.gRes;
 
     myIMU.readMagData(myIMU.magCount);  // Read the x/y/z adc values
-    /* User environmental x-axis correction in milliGauss, should be
-     * automatically calculated */
-    myIMU.magbias[0] = +470.;
-    // User environmental y-axis correction in milliGauss TODO axis??
-    myIMU.magbias[1] = +120.;
-    // User environmental z-axis correction in milliGauss
-    myIMU.magbias[2] = +125.;
-
-    /* Calculate the magnetometer values in milliGauss
-     * Include factory calibration per data sheet and user environmental
-     * corrections
-     * Get actual magnetometer value, this depends on scale being set */
-    myIMU.mx = (float)myIMU.magCount[0]*myIMU.mRes*myIMU.magCalibration[0] -
-              myIMU.magbias[0];
-    myIMU.my = (float)myIMU.magCount[1]*myIMU.mRes*myIMU.magCalibration[1] -
-              myIMU.magbias[1];
-    myIMU.mz = (float)myIMU.magCount[2]*myIMU.mRes*myIMU.magCalibration[2] -
-              myIMU.magbias[2];
+    /* Get actual magnetometer value, this depends on scale being set */
+    myIMU.mx = (float)myIMU.magCount[0]*myIMU.mRes;
+    myIMU.my = (float)myIMU.magCount[1]*myIMU.mRes;
+    myIMU.mz = (float)myIMU.magCount[2]*myIMU.mRes;
 
     myIMU.tempCount = myIMU.readTempData();  // Read the adc values
   }
@@ -152,9 +139,9 @@ void loop() { while(1){  // Arduino loop like
   printf("Z-mag field: % 0.2f mG\n", myIMU.mz);
 
   /* Temperature in degrees Centigrade */
-  /* TEMP_degC = ((TEMP_OUT - RoomTemp_Offset)/Temp_Sensitivity) + 21degC 
+  /* TEMP_degC = ((TEMP_OUT - RoomTemp_Offset)/Temp_Sensitivity) + 21degC
    * Data found on MPU-9250 Product Specification section 3.4.2
-   * Sensitivity = 333.87 LSB/°C 
+   * Sensitivity = 333.87 LSB/°C
    * Room Temp Offset = 0 LSB */
   myIMU.temperature = ((float) myIMU.tempCount) / 333.87 + 21.0;
   // Print temperature in degrees Centigrade
