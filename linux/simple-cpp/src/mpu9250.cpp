@@ -123,28 +123,17 @@ void MPU9250::readMagData(int16_t* destination){
   }
 }
 
-void MPU9250::getAres() {
-  /* Possible accelerometer scales (and their register bit settings) are:
-   * 2 Gs (00), 4 Gs (01), 8 Gs (10), and 16 Gs  (11). */
-  switch (Ascale){
-    /* Here's a bit of an algorith to calculate DPS/(ADC tick) based on that
-     * 2-bit value: */
-    case AFS_2G:
-      aRes = 2.0/32768.0;
-      break;
-    case AFS_4G:
-      aRes = 4.0/32768.0;
-      break;
-    case AFS_8G:
-      aRes = 8.0/32768.0;
-      break;
-    case AFS_16G:
-      aRes = 16.0/32768.0;
-      break;
-  }
+int16_t MPU9250::readTempData() {
+  chooseDevice(MPU9250_ADDRESS);
+  uint8_t rawData[2];  // temperature register data stored here
+  /* Read the two raw data registers sequentially into data array */
+  readBytes(TEMP_OUT_H, 2, &rawData[0]);
+  /* Turn the MSB and LSB into a 16-bit value */
+  return ((int16_t)rawData[0] << 8) | rawData[1];
 }
 
 void MPU9250::getGres() {
+  /* MPU 9250 Product Specification section 3.1 */
   /* Possible gyro scales (and their register bit settings) are:
    * 250 DPS (00), 500 DPS (01), 1000 DPS (10), and 2000 DPS  (11). */
   switch (Gscale){
@@ -165,6 +154,28 @@ void MPU9250::getGres() {
   }
 }
 
+void MPU9250::getAres() {
+  /* MPU 9250 Product Specification section 3.2 */
+  /* Possible accelerometer scales (and their register bit settings) are:
+   * 2 Gs (00), 4 Gs (01), 8 Gs (10), and 16 Gs  (11). */
+  switch (Ascale){
+    /* Here's a bit of an algorith to calculate DPS/(ADC tick) based on that
+     * 2-bit value: */
+    case AFS_2G:
+      aRes = 2.0/32768.0;
+      break;
+    case AFS_4G:
+      aRes = 4.0/32768.0;
+      break;
+    case AFS_8G:
+      aRes = 8.0/32768.0;
+      break;
+    case AFS_16G:
+      aRes = 16.0/32768.0;
+      break;
+  }
+}
+
 void MPU9250::getMres() {
   /* Possible magnetometer scales (and their register bit settings) are:
    * 14 bit resolution (0) and 16 bit resolution (1) */
@@ -176,13 +187,4 @@ void MPU9250::getMres() {
       mRes = 10.*4912./32760.0; // Proper scale to return milliGauss
       break;
   }
-}
-
-int16_t MPU9250::readTempData() {
-  chooseDevice(MPU9250_ADDRESS);
-  uint8_t rawData[2];  // x/y/z gyro register data stored here
-  /* Read the two raw data registers sequentially into data array */
-  readBytes(TEMP_OUT_H, 2, &rawData[0]);
-  /* Turn the MSB and LSB into a 16-bit value */
-  return ((int16_t)rawData[0] << 8) | rawData[1];
 }

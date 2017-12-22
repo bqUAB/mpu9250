@@ -75,11 +75,15 @@ void setup() {  // Arduino setup like
   if (c == 0x71){  // WHO_AM_I should always be 0x71
     printf("MPU9250 is online...\n");
 
+    myIMU.getGres();
+    myIMU.getAres();
+
     /* Read the WHO_AM_I register of the magnetometer, this is a good test of
      * communication */
     uint8_t d = myIMU.comTest(WHO_AM_I_AK8963);
     if (d == 0x48){  // WHO_AM_I should always be 0x48
-      
+      printf("AK8963 is online...\n");
+      myIMU.getMres();
     } else {
       perror("Could not connect to AK8963");
       exit(1);
@@ -94,18 +98,15 @@ void loop() { while(1){  // Arduino loop like
   /* If intPin goes high, all data registers have new data
    * On interrupt, check if data ready interrupt */
   if (myIMU.readByte(INT_STATUS) & 0x01){
+    
     myIMU.readAccelData(myIMU.accelCount);  // Read the x/y/z adc values
-    myIMU.getAres();
-
     /* Now we'll calculate the acceleration value into actual g's
      * This depends on scale being set */
-    myIMU.ax = (float)myIMU.accelCount[0]*myIMU.aRes;  // - accelBias[0];
-    myIMU.ay = (float)myIMU.accelCount[1]*myIMU.aRes;  // - accelBias[1];
-    myIMU.az = (float)myIMU.accelCount[2]*myIMU.aRes;  // - accelBias[2];
+    myIMU.ax = (float)myIMU.accelCount[0]*myIMU.aRes;
+    myIMU.ay = (float)myIMU.accelCount[1]*myIMU.aRes;
+    myIMU.az = (float)myIMU.accelCount[2]*myIMU.aRes;
 
     myIMU.readGyroData(myIMU.gyroCount);  // Read the x/y/z adc values
-    myIMU.getGres();
-
     /* Calculate the gyro value into actual degrees per second
      * This depends on scale being set */
     myIMU.gx = (float)myIMU.gyroCount[0]*myIMU.gRes;
@@ -113,7 +114,6 @@ void loop() { while(1){  // Arduino loop like
     myIMU.gz = (float)myIMU.gyroCount[2]*myIMU.gRes;
 
     myIMU.readMagData(myIMU.magCount);  // Read the x/y/z adc values
-    myIMU.getMres();
     /* User environmental x-axis correction in milliGauss, should be
      * automatically calculated */
     myIMU.magbias[0] = +470.;
@@ -151,7 +151,11 @@ void loop() { while(1){  // Arduino loop like
   printf("Y-mag field: % 0.2f mG\n", myIMU.my);
   printf("Z-mag field: % 0.2f mG\n", myIMU.mz);
 
-  // Temperature in degrees Centigrade
+  /* Temperature in degrees Centigrade */
+  /* TEMP_degC = ((TEMP_OUT - RoomTemp_Offset)/Temp_Sensitivity) + 21degC 
+   * Data found on MPU-9250 Product Specification section 3.4.2
+   * Sensitivity = 333.87 LSB/°C 
+   * Room Temp Offset = 0 LSB */
   myIMU.temperature = ((float) myIMU.tempCount) / 333.87 + 21.0;
   // Print temperature in degrees Centigrade
   printf("Temperature is % 0.2f degrees C\n", myIMU.temperature);

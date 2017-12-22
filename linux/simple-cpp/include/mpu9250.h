@@ -5,20 +5,36 @@
 #define _MPU9250_H_
 
 #include <stdint.h>         // Needed for unit uint8_t data type
-#include <stdio.h>          // Needed for printf, snprintf, perror
-#include <stdlib.h>         // Needed for exit()
 #include <sys/ioctl.h>      // Needed for ioctl
 #include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
+#include <stdio.h>          // Needed for printf, snprintf, perror
+#include <stdlib.h>         // Needed for exit()
 #include <unistd.h>         // Needed for write, usleep
-#include <math.h>           // Needed for pow
 
 /* See also MPU-9250 Register Map and Descriptions, Revision 6.0,
  * RM-MPU-9250A-00, Rev. 1.6, 01/07/2015 for registers not listed in above
  * document. */
 
- WHO_AM_I_MPU9250
- WHO_AM_I_AK8963
- INT_STATUS
+#define INT_STATUS         0x3A
+#define ACCEL_XOUT_H       0x3B
+#define ACCEL_XOUT_L       0x3C
+#define ACCEL_YOUT_H       0x3D
+#define ACCEL_YOUT_L       0x3E
+#define ACCEL_ZOUT_H       0x3F
+#define ACCEL_ZOUT_L       0x40
+#define TEMP_OUT_H         0x41
+#define TEMP_OUT_L         0x42
+#define GYRO_XOUT_H        0x43
+#define GYRO_XOUT_L        0x44
+#define GYRO_YOUT_H        0x45
+#define GYRO_YOUT_L        0x46
+#define GYRO_ZOUT_H        0x47
+#define GYRO_ZOUT_L        0x48
+
+#define WHO_AM_I_MPU9250   0x75 // Should return 0x71
+
+/* Magnetometer Registers */
+#define WHO_AM_I_AK8963  0x00 // should return 0x48
 
 /* Using the MPU-9250 breakout board, ADO is set to 0
  * Seven-bit device address is 110100 for ADO = 0 and 110101 for ADO = 1 */
@@ -27,11 +43,10 @@
 #define MPU9250_ADDRESS 0x69  // Device address when ADO = 1
 #else
 #define MPU9250_ADDRESS 0x68  // Device address when ADO = 0
-#define AK8963_ADDRESS  0x0C   // Address of magnetometer
+#define AK8963_ADDRESS  0x0C  // Address of magnetometer
 #endif // AD0
 
-class MPU9250
-{
+class MPU9250 {
   protected:
     /* Set initial input parameters */
     enum Gscale {
@@ -64,11 +79,6 @@ class MPU9250
   public:
     int* ptrFile;
 
-    float SelfTest[6];
-    /* Bias corrections for gyro and accelerometer */
-    float gyroBias[3] = {0, 0, 0}, accelBias[3] = {0, 0, 0};
-    /* Factory magnetometer calibration and magnetometer bias */
-    float magCalibration[3] = {0, 0, 0}, magbias[3] = {0, 0, 0};
     /* Stores the 16-bit signed sensor output */
     int16_t accelCount[3];  // Accelerometer
     int16_t gyroCount[3];   // Gyroscope
@@ -92,8 +102,8 @@ class MPU9250
     void readAccelData(int16_t* destination);
     void readGyroData(int16_t* destination);
     void readMagData(int16_t* destination);
-    void getAres();
     void getGres();
+    void getAres();
     void getMres();
     int16_t readTempData();
 };  // class MPU9250
