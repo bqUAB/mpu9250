@@ -16,75 +16,41 @@
 
 #include <stdio.h>          // Needed for printf, snprintf, perror
 #include <stdint.h>         // Needed for unit uint8_t data type
-#include <fcntl.h>          // Needed for open()
-#include <unistd.h>         // Needed for close()
 #include <stdlib.h>         // Needed for exit()
-#include <sys/ioctl.h>      // Needed for ioctl
-#include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
+#include "i2c.h"
 #include "mpu9250.h"
 
-void openI2C(int* ptrFile, uint8_t adapterN);
-void chooseDevice(int* ptrFile, uint8_t devAdd);
 void setup();
 void loop();
 
-MPU9250 myIMU;
-
 int main(){
-  /* Variable declaration */
-  int file = 0;
+  I2cBus i2c_2(2);  // Beagle Bone Black
+  Mpu9250 imu(i2c_2);
 
   printf("===== MPU 9250 Demo using Linux =====\n");
-  openI2C(&file, 2);  // Beagle Bone Black
-  myIMU.ptrFile = &file;
-
   setup();
   loop();
 
   return 0;
 }
 
-void openI2C(int* ptrFile, uint8_t adapterN){
-  /* ------------------------> Open the I2C adapter <------------------------ */
-  char filename[11]; // To hold /dev/i2c-#
-
-  /* Access an I2C adapter from a C++ program */
-  snprintf(filename, sizeof(filename), "/dev/i2c-%d", adapterN);
-
-  /* Open I2C bus driver */
-  if ((*ptrFile = open(filename, O_RDWR)) < 0) {
-    /* ERROR HANDLING: you can check errno to see what went wrong */
-    perror("Failed to open the I2C bus.\n");
-    exit(1);
-  }
-}
-
-void chooseDevice(int* ptrFile, uint8_t devAdd){
-  /* ---------------> Specify device address to communicate <---------------- */
-  if (ioctl(*ptrFile, I2C_SLAVE, devAdd) < 0){
-    printf("Failed to acquire bus access and/or talk to slave.\n");
-    /* ERROR HANDLING; you can check errno to see what went wrong */
-    exit(1);
-  }
-}
-
 void setup() {  // Arduino setup like
   /* Initiating communication */
-  uint8_t c = myIMU.comTest(WHO_AM_I_MPU9250);
+  uint8_t c = imu.comTest(kWhoAmImpu6500);
 
   if (c == 0x71){  // WHO_AM_I should always be 0x71
     printf("MPU9250 is online...\n");
 
-    myIMU.initMPU9250();
-    myIMU.getGres();
-    myIMU.getAres();
+    imu.initMPU9250();
+    imu.getGres();
+    imu.getAres();
 
-    /* Read the WHO_AM_I register of the magnetometer, this is a good test of
+    /* Read the WIA register of the magnetometer, this is a good test of
      * communication */
-    uint8_t d = myIMU.comTest(WHO_AM_I_AK8963);
+    uint8_t d = imu.comTest(kWia);
     if (d == 0x48){  // WHO_AM_I should always be 0x48
       printf("AK8963 is online...\n");
-      myIMU.getMres();
+      imu.getMres();
     } else {
       perror("Could not connect to AK8963");
       exit(1);
@@ -98,54 +64,54 @@ void setup() {  // Arduino setup like
 void loop() { while(1){  // Arduino loop like
   /* If intPin goes high, all data registers have new data
    * On interrupt, check if data ready interrupt */
-  if (myIMU.readByte(INT_STATUS) & 0x01){
+  if (imu.readByte(kIntStatus) & 0x01){
 
-    myIMU.readAccelData(myIMU.accelCount);  // Read the x/y/z adc values
+    imu.readAccelData(imu.accelCount);  // Read the x/y/z adc values
     /* Now we'll calculate the acceleration value into actual g's
      * This depends on scale being set */
-    myIMU.ax = (float)myIMU.accelCount[0]*myIMU.aRes;
-    myIMU.ay = (float)myIMU.accelCount[1]*myIMU.aRes;
-    myIMU.az = (float)myIMU.accelCount[2]*myIMU.aRes;
+    imu.ax = (float)imu.accelCount[0]*imu.aRes;
+    imu.ay = (float)imu.accelCount[1]*imu.aRes;
+    imu.az = (float)imu.accelCount[2]*imu.aRes;
 
-    myIMU.readGyroData(myIMU.gyroCount);  // Read the x/y/z adc values
+    imu.readGyroData(imu.gyroCount);  // Read the x/y/z adc values
     /* Calculate the gyro value into actual degrees per second
      * This depends on scale being set */
-    myIMU.gx = (float)myIMU.gyroCount[0]*myIMU.gRes;
-    myIMU.gy = (float)myIMU.gyroCount[1]*myIMU.gRes;
-    myIMU.gz = (float)myIMU.gyroCount[2]*myIMU.gRes;
+    imu.gx = (float)imu.gyroCount[0]*imu.gRes;
+    imu.gy = (float)imu.gyroCount[1]*imu.gRes;
+    imu.gz = (float)imu.gyroCount[2]*imu.gRes;
 
-    myIMU.readMagData(myIMU.magCount);  // Read the x/y/z adc values
+    imu.readMagData(imu.magCount);  // Read the x/y/z adc values
     /* Get actual magnetometer value, this depends on scale being set */
-    myIMU.mx = (float)myIMU.magCount[0]*myIMU.mRes;
-    myIMU.my = (float)myIMU.magCount[1]*myIMU.mRes;
-    myIMU.mz = (float)myIMU.magCount[2]*myIMU.mRes;
+    imu.mx = (float)imu.magCount[0]*imu.mRes;
+    imu.my = (float)imu.magCount[1]*imu.mRes;
+    imu.mz = (float)imu.magCount[2]*imu.mRes;
 
-    myIMU.tempCount = myIMU.readTempData();  // Read the adc values
+    imu.tempCount = imu.readTempData();  // Read the adc values
   }
 
   /* Print acceleration values in milligs! */
-  printf("X-acceleration: % 0.2f mg\n", 1000*myIMU.ax);
-  printf("Y-acceleration: % 0.2f mg\n", 1000*myIMU.ay);
-  printf("Z-acceleration: % 0.2f mg\n", 1000*myIMU.az);
+  printf("X-acceleration: % 0.2f mg\n", 1000*imu.ax);
+  printf("Y-acceleration: % 0.2f mg\n", 1000*imu.ay);
+  printf("Z-acceleration: % 0.2f mg\n", 1000*imu.az);
 
   /* Print gyro values in degree/sec */
-  printf("X-gyro rate: % 0.2f degrees/sec\n", myIMU.gx);
-  printf("Y-gyro rate: % 0.2f degrees/sec\n", myIMU.gy);
-  printf("Z-gyro rate: % 0.2f degrees/sec\n", myIMU.gz);
+  printf("X-gyro rate: % 0.2f degrees/sec\n", imu.gx);
+  printf("Y-gyro rate: % 0.2f degrees/sec\n", imu.gy);
+  printf("Z-gyro rate: % 0.2f degrees/sec\n", imu.gz);
 
   /* Print mag values in degree/sec */
-  printf("X-mag field: % 0.2f mG\n", myIMU.mx);
-  printf("Y-mag field: % 0.2f mG\n", myIMU.my);
-  printf("Z-mag field: % 0.2f mG\n", myIMU.mz);
+  printf("X-mag field: % 0.2f mG\n", imu.mx);
+  printf("Y-mag field: % 0.2f mG\n", imu.my);
+  printf("Z-mag field: % 0.2f mG\n", imu.mz);
 
   /* Temperature in degrees Centigrade */
   /* TEMP_degC = ((TEMP_OUT - RoomTemp_Offset)/Temp_Sensitivity) + 21degC
    * Data found on MPU-9250 Product Specification section 3.4.2
    * Sensitivity = 333.87 LSB/°C
    * Room Temp Offset = 0 LSB */
-  myIMU.temperature = ((float) myIMU.tempCount) / 333.87 + 21.0;
+  imu.temperature = ((float) imu.tempCount) / 333.87 + 21.0;
   // Print temperature in degrees Centigrade
-  printf("Temperature is % 0.2f degrees C\n", myIMU.temperature);
+  printf("Temperature is % 0.2f degrees C\n", imu.temperature);
 
   usleep(0.2*1000000);
 }}

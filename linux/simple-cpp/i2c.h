@@ -10,7 +10,7 @@ http://docs.micropython.org/en/latest/wipy/library/machine.I2C.html
 #include <unistd.h>  // Needed for write, close
 #include <stdlib.h>  // Needed for exit()
 #include <sys/ioctl.h>  // Needed for ioctl
-#include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
+// #include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
 
 class I2cBus {
   private:

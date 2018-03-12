@@ -1,87 +1,26 @@
+// Set of basic functions to access accelerometer, gyroscope, magnetometer, and
+// temperature data
+
 #include "mpu9250.h"
 
-/*******************************************************************************
- * Set of basic functions to access accelerometer, gyroscope, magnetometer, and
- * temperature data
- ******************************************************************************/
 
-void MPU9250::chooseDevice(uint8_t devAdd){
-  /* ---------------> Specify device address to communicate <---------------- */
-  if (ioctl(*ptrFile, I2C_SLAVE, devAdd) < 0){
-    printf("Failed to acquire bus access and/or talk to slave.\n");
-    /* ERROR HANDLING; you can check errno to see what went wrong */
-    exit(1);
-  }
-}
-
-/* Linux I2C read and write protocols */
-void MPU9250::writeByte(uint8_t regAdd, uint8_t data){
-
-  //uint8_t bSuccess = 0;
-  uint8_t wBuf[2];
-
-  /* Write to define register */
-  wBuf[0] = regAdd;
-  wBuf[1] = data;
-  if (write(*ptrFile, &wBuf, sizeof(wBuf)) == sizeof(wBuf)){
-    //bSuccess = 1;
-  } else {
-    /* ERROR HANDLING: i2c transaction failed */
-    //bSuccess = 0;
-  }
-}
-
-uint8_t MPU9250::readByte(uint8_t regAdd){
-
-  //uint8_t bSuccess = 0;
-  uint8_t data; // `data` will store the register data
-
-  /* write to define register */
-  if (write(*ptrFile, &regAdd, sizeof(regAdd)) == sizeof(regAdd)){
-
-    /* read back value */
-    if (read(*ptrFile, &data, sizeof(data)) == sizeof(data)){
-      //bSuccess = 1;
-    }
-  }
-
-  return data;  // Return data read from slave register
-}
-
-void MPU9250::readBytes(uint8_t regAdd, uint8_t count,
-                        uint8_t* data){
-
-  //uint8_t bSuccess = 0;
-  /* write to define register */
-  if (write(*ptrFile, &regAdd, sizeof(regAdd)) == sizeof(regAdd)){
-    // read back value
-    if (read(*ptrFile, data, count) == count){
-      //bSuccess = 1;
-    }
-  }
-}
-
-uint8_t MPU9250::comTest(uint8_t WHO_AM_I){
+uint8_t Mpu9250::ComTest(uint8_t who_am_i){
   /* Read the WHO_AM_I register, this is a good test of communication */
   uint8_t c;
 
-  if (WHO_AM_I == WHO_AM_I_AK8963){
-    chooseDevice(AK8963_ADDRESS);
+  if (who_am_i == kAk8963Addr){
     printf("AK8963 should be: 0x48\t");
-    c = readByte(WHO_AM_I_AK8963);
+    c = i2c_n.ReadFromMem(kAk8963Addr, kWia);
   } else {
-    chooseDevice(MPU9250_ADDRESS);
     printf("MPU9250 should be: 0x71\t");
-    c = readByte(WHO_AM_I_MPU9250);
+    c = i2c_n.ReadFromMem(kMpu6500Addr, kWhoAmImpu6500);
   }
 
   printf("WHO_AM_I: %#X\n", c);
   return c;
 }
 
-void MPU9250::initMPU9250(){
-  chooseDevice(MPU9250_ADDRESS);
-
+void Mpu9250::InitMPU9250(){
   /* -------------------> Configure Gyro and Thermometer <------------------- */
   /* Disable FSYNC and set thermometer and gyro bandwith to 41 and 42 Hz
    * rerspectively; minimum delay time for this setting is 5.9 ms, which means
@@ -130,7 +69,7 @@ void MPU9250::initMPU9250(){
 
 }
 
-void MPU9250::readAccelData(int16_t* destination){
+void Mpu9250::ReadAccelData(int16_t* destination){
   chooseDevice(MPU9250_ADDRESS);
   uint8_t rawData[6];  // x/y/z accel register data stored here
   /* Read the six raw data registers into data array */
@@ -141,7 +80,7 @@ void MPU9250::readAccelData(int16_t* destination){
   destination[2] = ((int16_t)rawData[4] << 8) | rawData[5];
 }
 
-void MPU9250::readGyroData(int16_t* destination){
+void Mpu9250::ReadGyroData(int16_t* destination){
   chooseDevice(MPU9250_ADDRESS);
   uint8_t rawData[6];  // x/y/z gyro register data stored here
   /* Read the six raw data registers sequentially into data array */
@@ -152,7 +91,7 @@ void MPU9250::readGyroData(int16_t* destination){
   destination[2] = ((int16_t)rawData[4] << 8) | rawData[5];
 }
 
-void MPU9250::readMagData(int16_t* destination){
+void Mpu9250::ReadMagData(int16_t* destination){
   chooseDevice(AK8963_ADDRESS);
   /* x/y/z gyro register data, ST2 register stored here, must read ST2 at end of
    * data acquisition */
@@ -174,8 +113,7 @@ void MPU9250::readMagData(int16_t* destination){
   }
 }
 
-int16_t MPU9250::readTempData() {
-  chooseDevice(MPU9250_ADDRESS);
+int16_t Mpu9250::ReadTempData() {
   uint8_t rawData[2];  // temperature register data stored here
   /* Read the two raw data registers sequentially into data array */
   readBytes(TEMP_OUT_H, 2, &rawData[0]);
@@ -183,7 +121,7 @@ int16_t MPU9250::readTempData() {
   return ((int16_t)rawData[0] << 8) | rawData[1];
 }
 
-void MPU9250::getGres() {
+void Mpu9250::GetGres() {
   /* MPU 9250 Product Specification section 3.1 */
   /* Possible gyro scales (and their register bit settings) are:
    * 250 DPS (00), 500 DPS (01), 1000 DPS (10), and 2000 DPS  (11). */
@@ -205,7 +143,7 @@ void MPU9250::getGres() {
   }
 }
 
-void MPU9250::getAres() {
+void Mpu9250::GetAres() {
   /* MPU 9250 Product Specification section 3.2 */
   /* Possible accelerometer scales (and their register bit settings) are:
    * 2 Gs (00), 4 Gs (01), 8 Gs (10), and 16 Gs  (11). */
@@ -227,15 +165,15 @@ void MPU9250::getAres() {
   }
 }
 
-void MPU9250::getMres() {
+void Mpu9250::GetMres() {
   /* Possible magnetometer scales (and their register bit settings) are:
    * 14 bit resolution (0) and 16 bit resolution (1) */
-  switch (Mscale){
-    case MFS_14BITS:
-      mRes = 10.*4912./8190.; // Proper scale to return milliGauss
+  switch (magnetom_scale) {
+    case kMfs14Bits:
+      m_res = 10.*4912./8190.; // Proper scale to return milliGauss
       break;
-    case MFS_16BITS:
-      mRes = 10.*4912./32760.0; // Proper scale to return milliGauss
+    case kMfs16Bits:
+      m_res = 10.*4912./32760.0; // Proper scale to return milliGauss
       break;
   }
 }
