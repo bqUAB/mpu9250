@@ -1,18 +1,19 @@
-################################################################################
-# Makefile for ARM Linux                                                       #
-# Tested on SoC EDS 16.1 on Windows 7 64-Bit                                   #
-#                                                                              #
-# Copyright (C) 2015 by Joel Bodenmann <joel@embedded.pro>                     #
-# Modified 24 November 2017 by Byron Quezada <github.com/bqUAB>                #
-#                                                                              #
-# Feel free to use this makefile without any warranty on your own risk.        #
-################################################################################
+###############################################################################
+# C++ Makefile for ARM Linux
+# Tested on SoC EDS 17.1 on Windows 10 64-Bit
+#
+# Copyright (C) 2015 by Joel Bodenmann <joel@embedded.pro>
+# https://blog.embedded.pro/de1-soc-a-better-makefile/
+# Modified 24 November 2017 by Byron Quezada <github.com/bqUAB>
+#
+# Feel free to use this makefile without any warranty on your own risk.
+###############################################################################
 
 # This is the name of the binaries that will be generated
-TARGET  = mpu-9250-simple-demo
+TARGET  = mpu9250-demo
 
-# Here we add all *.cpp files that we want to compile
-CPPSRCS = main.cpp mpu9250.cpp
+# Here we add all *.cc files that we want to compile
+CPPSRCS = main.cc i2c.cc mpu9250.cc
 
 # Here we add the paths to all include directories
 INCS    = ../include
@@ -21,14 +22,15 @@ INCS    = ../include
 LIBS    = -lm
 
 # Parameters for SCP upload. Set up SSH keys to bypass password prompt
-SCP_TARGET_IP   = 192.168.0.11
-SCP_USER        = debian
-SCP_TARGET_PATH = /home/debian/bin
+SCP_TARGET_IP   = 192.168.0.100
+SCP_USER        = root
+SCP_TARGET_PATH = /home/root/bin
 SCP             = scp
 SCP_FLAGS       =
 
 # Compiler settings
 ARCH     = arm-linux-gnueabihf
+LD       = $(ARCH)-g++
 CPPC     = $(ARCH)-g++
 SIZE     = $(ARCH)-size
 CPPFLAGS = -g -std=c++11 -Wall
@@ -39,8 +41,8 @@ LDFLAGS  = -g -Wall
 ################################################################################
 
 # Some directory and file magic
-BINDIR   = ../bin
-BUILDDIR = ../build
+BINDIR   = ./bin
+BUILDDIR = ./build
 OBJDIR   = $(BUILDDIR)/obj
 
 # Generate the object names
@@ -71,10 +73,10 @@ builddirs:
 $(BINDIR)/$(TARGET): $(OBJS)
 	@echo
 	@echo Linking $@
-	@$(CPPC) $(LDFLAGS) -o $(BINDIR)/$(TARGET) $(OBJS)
+	@$(LD) $(LDFLAGS) -o $(BINDIR)/$(TARGET) $(OBJS)
 
 # Compile c files
-$(OBJDIR)/%.o: %.cpp
+$(OBJDIR)/%.o: %.cc
 	@mkdir -p $(dir $@)
 	@echo
 	@echo Compiling $^

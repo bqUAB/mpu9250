@@ -1,4 +1,4 @@
-#include <mpu9250.h>
+#include "mpu9250.h"
 
 /*******************************************************************************
  * Set of basic functions to access accelerometer, gyroscope, magnetometer, and

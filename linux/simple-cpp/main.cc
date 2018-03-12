@@ -21,7 +21,7 @@
 #include <stdlib.h>         // Needed for exit()
 #include <sys/ioctl.h>      // Needed for ioctl
 #include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
-#include <mpu9250.h>
+#include "mpu9250.h"
 
 void openI2C(int* ptrFile, uint8_t adapterN);
 void chooseDevice(int* ptrFile, uint8_t devAdd);
