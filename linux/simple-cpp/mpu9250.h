@@ -20,7 +20,6 @@
 /* Using the MPU-9250 breakout board, ADO is set to 0
    Seven-bit device address is 110100 for ADO = 0 and 110101 for ADO = 1 */
 
-
 // const uint8_t kMpu6500Addr = 0x69;  // Device address when ADO = 1
 const uint8_t kMpu6500Addr = 0x68;  // Device address when ADO = 0
 
@@ -69,12 +68,13 @@ const uint8_t kHzh  = 0x08;
 
 class Mpu9250 {
   protected:
+    I2cBus* ptr_i2c;
     /* Set initial input parameters */
     enum GyroScale {
       kGfs250Dps = 0,
       kGfs500Dps,
       kGfs1000Dps,
-      kGfs_2000Dps
+      kGfs2000Dps
     };
 
     enum AccelScale {
@@ -98,14 +98,14 @@ class Mpu9250 {
     uint8_t m_mode = 0x02;
 
   public:
-    Mpu9250(I2cBus i2c_n);
+    Mpu9250(I2cBus* i2c_n);
 
     /* Stores the 16-bit signed sensor output */
     int16_t accel_count[3];  // Accelerometer
     int16_t gyro_count[3];  // Gyroscope
     int16_t magnetom_count[3];  // Magnetometer
     // Scale resolutions per LSB for the sensors
-    float a_res, g_res, m_res;
+    float accel_res, gyro_res, magnetom_res;
     // Variables to hold latest sensor data values
     float ax, ay, az, gx, gy, gz, mx, my, mz;
 
@@ -116,14 +116,14 @@ class Mpu9250 {
   void ChooseDevice(bool magnetom);
 
   public:
-    uint8_t ComTest(uint8_t who_am_i);
-    void InitMPU9250();
+    uint8_t ComTest(uint8_t test_who);
+    void InitMpu9250();
     void ReadAccelData(int16_t* destination);
     void ReadGyroData(int16_t* destination);
-    void ReadMagData(int16_t* destination);
-    void GetGres();
-    void GetAres();
-    void GetMres();
+    void ReadMagnetomData(int16_t* destination);
+    void GetGyroRes();
+    void GetAccelRes();
+    void GetMagnetomRes();
     int16_t ReadTempData();
 };  // class MPU9250
 

@@ -1,8 +1,8 @@
 /* Simplified I2C class based on:
 http://docs.micropython.org/en/latest/wipy/library/machine.I2C.html
 */
-#ifndef I2C_H
-#define I2C_H
+#ifndef I2C_H_
+#define I2C_H_
 
 #include <stdio.h>  // Needed for printf, snprintf, perror
 #include <cstdint>  // Needed for unit uint8_t data type
@@ -10,7 +10,7 @@ http://docs.micropython.org/en/latest/wipy/library/machine.I2C.html
 #include <unistd.h>  // Needed for write, close
 #include <stdlib.h>  // Needed for exit()
 #include <sys/ioctl.h>  // Needed for ioctl
-// #include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
+#include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
 
 class I2cBus {
   private:
@@ -36,4 +36,4 @@ class I2cBus {
 
 };
 
-#endif // I2C_H
+#endif // I2C_H_
