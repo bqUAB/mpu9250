@@ -107,7 +107,9 @@ class Mpu9250 {
     // Scale resolutions per LSB for the sensors
     float accel_res, gyro_res, magnetom_res;
     // Variables to hold latest sensor data values
-    float ax, ay, az, gx, gy, gz, mx, my, mz;
+    float accel_x, accel_y, accel_z;
+    float gyro_x, gyro_y, gyro_z;
+    float magnetom_x, magnetom_y, magnetom_z;
 
     int16_t temp_count;  // Temperature raw count output
     float temperature;  // Stores the real internal chip temperature in Celsius
