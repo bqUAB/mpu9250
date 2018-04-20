@@ -5,8 +5,6 @@
 #define MPU9250_H_
 
 #include <stdint.h>         // Needed for unit uint8_t data type
-#include <sys/ioctl.h>      // Needed for ioctl
-// #include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
 #include <stdio.h>          // Needed for printf, snprintf, perror
 #include <stdlib.h>         // Needed for exit()
 #include <unistd.h>         // Needed for write, usleep
