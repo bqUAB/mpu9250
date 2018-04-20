@@ -1,5 +1,5 @@
-// Set of basic functions to access accelerometer, gyroscope, magnetometer, and
-// temperature data
+// Set of basic functions to access accelerometer, gyroscope, magnetometer,
+// and temperature data
 
 #include "mpu9250.h"
 
@@ -14,10 +14,10 @@ uint8_t Mpu9250::ComTest(uint8_t test_who){
 
   if (test_who == kWia){
     printf("AK8963 should be: 0x48\t");
-    who_am_i = ptr_i2c->ReadFromMem(kAk8963Addr, kWia);
+    ptr_i2c->ReadFromMem(kAk8963Addr, kWia, &who_am_i);
   } else if (test_who == kWhoAmImpu6500) {
     printf("MPU9250 should be: 0x71\t");
-    who_am_i = ptr_i2c->ReadFromMem(kMpu6500Addr, kWhoAmImpu6500);
+    ptr_i2c->ReadFromMem(kMpu6500Addr, kWhoAmImpu6500, &who_am_i);
   } else {
     perror("Mpu9250 WHO_AM_I register not valid!\n");
     exit(1);
@@ -157,8 +157,10 @@ void Mpu9250::ReadMagnetomData(int16_t* destination){
   /* x/y/z gyro register data, ST2 register stored here, must read ST2 at end of
    * data acquisition */
   uint8_t raw_data[7];
+  uint8_t data_ready;
   /* Wait for magnetometer data ready bit to be set */
-  if(ptr_i2c->ReadFromMem(kAk8963Addr, kSt1) & 0x01)
+  ptr_i2c->ReadFromMem(kAk8963Addr, kSt1, &data_ready);
+  if( data_ready == 0x01)
   {
     /* Read the six raw data and ST2 registers sequentially into data array */
     ptr_i2c->ReadFromMemInto(kAk8963Addr, kHxl, 7, &raw_data[0]);
