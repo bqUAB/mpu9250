@@ -5,20 +5,18 @@
 #define MPU9250_H_
 
 #include <stdint.h>         // Needed for unit uint8_t data type
-#include <sys/ioctl.h>      // Needed for ioctl
-// #include <linux/i2c-dev.h>  // Needed to use the I2C Linux driver (I2C_SLAVE)
 #include <stdio.h>          // Needed for printf, snprintf, perror
 #include <stdlib.h>         // Needed for exit()
 #include <unistd.h>         // Needed for write, usleep
 #include "i2c.h"
 
-/* See also MPU-9250 Register Map and Descriptions, Revision 6.0,
- * RM-MPU-9250A-00, Rev. 1.6, 01/07/2015 for registers not listed in above
- * document. */
+// See also MPU-9250 Register Map and Descriptions, Revision 6.0,
+// RM-MPU-9250A-00, Rev. 1.6, 01/07/2015 for registers not listed in above
+// document.
 
 // MPU6500 Registers
-/* Using the MPU-9250 breakout board, ADO is set to 0
-   Seven-bit device address is 110100 for ADO = 0 and 110101 for ADO = 1 */
+// Using the MPU-9250 breakout board, ADO is set to 0
+// Seven-bit device address is 110100 for ADO = 0 and 110101 for ADO = 1
 
 // const uint8_t kMpu6500Addr = 0x69;  // Device address when ADO = 1
 const uint8_t kMpu6500Addr = 0x68;  // Device address when ADO = 0
@@ -69,7 +67,7 @@ const uint8_t kHzh  = 0x08;
 class Mpu9250 {
   protected:
     I2cBus* ptr_i2c;
-    /* Set initial input parameters */
+    // Set initial input parameters
     enum GyroScale {
       kGfs250Dps = 0,
       kGfs500Dps,
@@ -89,18 +87,18 @@ class Mpu9250 {
       kMfs16Bits      // 0.15 mG per LSB
     };
 
-    /* Specify sensor full scale */
+    // Specify sensor full scale
     uint8_t gyro_scale = kGfs250Dps;
     uint8_t accel_scale = kAfs2G;
-    /* Choose either 14-bit or 16-bit magnetometer resolution */
+    // Choose either 14-bit or 16-bit magnetometer resolution
     uint8_t magnetom_scale = kMfs16Bits;
-    /* 2 for 8 Hz, 6 for 100 Hz continuous magnetometer data read */
+    // 2 for 8 Hz, 6 for 100 Hz continuous magnetometer data read
     uint8_t m_mode = 0x02;
 
   public:
     Mpu9250(I2cBus* i2c_n);
 
-    /* Stores the 16-bit signed sensor output */
+    // Stores the 16-bit signed sensor output
     int16_t accel_count[3];  // Accelerometer
     int16_t gyro_count[3];  // Gyroscope
     int16_t magnetom_count[3];  // Magnetometer
