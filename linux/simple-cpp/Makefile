@@ -22,9 +22,9 @@ INCS    = ../include
 LIBS    = -lm
 
 # Parameters for SCP upload. Set up SSH keys to bypass password prompt
-SCP_TARGET_IP   = 192.168.0.11
-SCP_USER        = debian
-SCP_TARGET_PATH = /home/debian/bin
+SCP_TARGET_IP   = 192.168.0.12
+SCP_USER        = pi
+SCP_TARGET_PATH = /home/pi/bin
 SCP             = scp
 SCP_FLAGS       =
 
