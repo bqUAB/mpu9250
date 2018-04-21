@@ -20,6 +20,22 @@
 #include "i2c.h"
 #include "mpu9250.h"
 #include <math.h>
+
+
+bool get_Roll(float accel_x, float accel_y, float accel_z, float* roll)
+{
+    
+    bool success;
+    *roll=atan2(accel_y , accel_z) * 57.3;
+    if(roll){
+      success=1;
+
+    }else success=0;
+
+    return success;
+}
+
+
 int main(){
   I2cBus i2c_bus(1);  // Beagle Bone Black
   Mpu9250 imu(&i2c_bus);
@@ -86,12 +102,13 @@ int main(){
     printf("Y-acceleration: % 0.2f mg\n", 1000*imu.accel_y);
     printf("Z-acceleration: % 0.2f mg\n", 1000*imu.accel_z);
 
-    float angle_y,angle_x;
-    float A_R=16384.0;
-    angle_y=atan(-1*(imu.accel_x)/(sqrt((imu.accel_y)*(imu.accel_y)+(imu.accel_z)*(imu.accel_z))))*(180/3.1416);
-    angle_x=atan((imu.accel_y)/(sqrt((imu.accel_x)*(imu.accel_x)+(imu.accel_z)*(imu.accel_z))))*(180/3.1416);
-    printf("Y-degrees: %0.2f º \n", angle_x);
-    printf("X-degrees: %0.2f º \n", angle_y);
+    float myroll;
+     if (get_Roll(imu.accel_x, imu.accel_y, imu.accel_z, &myroll))
+    {
+        printf("Get roll succesful\n");
+        printf("Y-degrees: %0.2fº\n", myroll);
+     
+    }
     /* Print gyro values in degree/sec */
     printf("X-gyro rate: % 0.2f degrees/sec\n", imu.gyro_x);
     printf("Y-gyro rate: % 0.2f degrees/sec\n", imu.gyro_y);
@@ -113,6 +130,9 @@ int main(){
 
     usleep(0.2*1000000);
   }
+ 
 
   return 0;
 }
+
+
