@@ -110,12 +110,12 @@ int main(){
      
     }
     /* Print gyro values in degree/sec */
-    printf("X-gyro rate: % 0.2f degrees/sec\n", imu.gyro_x);
+   /* printf("X-gyro rate: % 0.2f degrees/sec\n", imu.gyro_x);
     printf("Y-gyro rate: % 0.2f degrees/sec\n", imu.gyro_y);
-    printf("Z-gyro rate: % 0.2f degrees/sec\n", imu.gyro_z);
+    printf("Z-gyro rate: % 0.2f degrees/sec\n", imu.gyro_z); */
 
     /* Print mag values in degree/sec */
-    printf("X-mag field: % 0.2f mG\n", imu.magnetom_x);
+    /*printf("X-mag field: % 0.2f mG\n", imu.magnetom_x);
     printf("Y-mag field: % 0.2f mG\n", imu.magnetom_y);
     printf("Z-mag field: % 0.2f mG\n", imu.magnetom_z);
 
@@ -126,7 +126,7 @@ int main(){
      * Room Temp Offset = 0 LSB */
     imu.temperature = ((float) imu.temp_count) / 333.87 + 21.0;
     // Print temperature in degrees Centigrade
-    printf("Temperature is % 0.2f degrees C\n", imu.temperature);
+    /*printf("Temperature is % 0.2f degrees C\n", imu.temperature);*/
 
     usleep(0.2*1000000);
   }
